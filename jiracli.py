@@ -134,8 +134,12 @@ class PyJiraCli(object):
 
 	def jql(self, jql, max_results=10):
 		# summary, assignee, reporter, status, created, updated, description, parent, project, subtasks
-		issues = self.jira.search(jql, max_results=max_results, fields=["assignee", "reporter", "status", "created", "updated", "description", "parent", "project", "subtasks"])
-		print "\n".join(str(issue) for issue in issues)
+		issues = self.jira.search(jql, max_results=max_results)
+		# print "\n".join(str(issue) for issue in issues)
+		for issue in issues:
+			print issue
+			if len(issue._subtasks) > 0:
+				print "\n".join(" |- " + str(subtask) for subtask in issue._subtasks)
 
 	def get(self, key):
 		print self.jira.get(key)

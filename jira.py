@@ -1,6 +1,8 @@
 import http
 import json
 import re
+import dateutil.parser
+import time
 
 class JiraRestApi(object):
 
@@ -117,25 +119,71 @@ class JiraRestApi(object):
 JiraRestApi._CURL_VERBOSE = False
 
 
-
-class Issue(object):
+class BasicIssue(object):
 
 	def __init__(self, raw_obj):
 		fields = raw_obj["fields"]
 		self._key = raw_obj["key"].encode("utf8")
-		self._status = fields["status"]["name"].encode("utf8")
 		self._summary = fields["summary"].encode("utf8")
+		self._status = fields["status"]["name"].encode("utf8")
+		self._type = fields["issuetype"]["name"].encode("utf8")
 
 	def __str__(self):
-		return "%s [%s] %s" % (self._key, self._status, self._summary)
+		return  "%s [%s] %s" % (self._key, self._status, self._summary)
+
+class Issue(BasicIssue):
+
+	def __init__(self, raw_obj):
+		fields = raw_obj["fields"]
+		self._key = raw_obj["key"].encode("utf8")
+		self._summary = fields["summary"].encode("utf8")
+		self._status = fields["status"]["name"].encode("utf8")
+		self._description = fields["description"].encode("utf8")
+		self._type = fields["issuetype"]["name"].encode("utf8")
+
+		if fields["assignee"] != None:
+			self._assignee = fields["assignee"]["displayName"].encode("utf8")
+		else:
+			self._assignee = None
+
+		_updated = fields["updated"]
+		self._updated = time.mktime(dateutil.parser.parse(_updated).timetuple())
+
+		if "parent" in fields and fields["parent"] != None:
+			self._parent = BasicIssue(fields["parent"])
+		else:
+			self._parent = None
+
+		if "subtasks" in fields and fields["subtasks"] != None:
+			_subtasks = fields["subtasks"]
+			_subtasks = map(lambda issue: BasicIssue(issue), _subtasks)
+			self._subtasks = _subtasks
+		else:
+			self._subtasks = []
+
+
+
+	def __str__(self):
+		str_ =  "%s [%s] %s" % (self._key, self._status, self._summary)
+
+		if self._parent != None:
+			str_ += " ^" + self._parent._key
+
+		if len(self._subtasks) != 0:
+			str_ += " [%d Subtasks]" % (len(self._subtasks))
+
+		if self._assignee != None:
+			str_ += " @" + self._assignee
+
+		return str_
 
 
 class Jira(JiraRestApi):
 
-	def search(self, jql, max_results=10, fields=["summary", "status"]):
-		result = super(Jira, self).search(jql, max_results, fields)
+	def search(self, jql, max_results=10, fields=["summary", "description", "assignee", "status", "issuetype", "updated", "parent", "subtasks"]):
+		# fields: summary, description, issuetype, assignee, status, issuetype, updated, parent, subtasks#key, project, reporter, created
 
-		print "### " + json.dumps(str(result))
+		result = super(Jira, self).search(jql, max_results, fields)
 
 		items = []
 

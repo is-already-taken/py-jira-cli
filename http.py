@@ -25,11 +25,14 @@ class Http(object):
 		#c.setopt(pycurl.URL, 'http://stackoverflow.com')
 		self.c.setopt(pycurl.URL, url)
 
-		if method == 'POST':
+		if method == 'POST' or method == 'PUT':
 			if data == None:
-				raise Exception("Canot post with None data")
+				raise Exception("Cannot %s with None data" % (method))
 
-			self.c.setopt(pycurl.POST, 1)
+			if method == 'POST':
+				self.c.setopt(pycurl.POST, 1)
+			elif method == 'PUT':
+				self.c.setopt(pycurl.CUSTOMREQUEST, "PUT")
 
 			# convert dict to URL encoded string
 			if type(data) == dict:
@@ -84,6 +87,9 @@ class Http(object):
 	def get(self, url, headers=[], cookies=[]):
 		return self.method("GET", url, None, headers, cookies)
 
+	"""Send HTTP PUT passing data, headers and cookies."""
+	def put(self, url, data, headers=[], cookies=[]):
+		return self.method("PUT", url, data, headers, cookies)
 
 """Wraps pycurl.error exceptions for HTTP errors"""
 class HttpError(Exception):

@@ -155,6 +155,25 @@ class JiraRestApi(object):
 		return json.loads(res, "utf8")
 
 
+	def assign(self, key, assignee):
+		if self._auth_cookies == None:
+			raise Exception("Not authenticated")
+
+		req_json_str = json.dumps({
+			"name": assignee
+		})
+
+		call = "/api/2/issue/%s/assignee" % (key)
+
+		(status, res, _cookies) = self.http.put(
+			self._base_url + call,
+			req_json_str,
+			headers=["Content-Type: application/json"],
+			cookies=self._auth_cookies)
+
+		if status != 204:
+			raise Exception("Non 204 (%d) for %s: %s" % (status, call, str(res)))
+
 
 JiraRestApi._CURL_VERBOSE = False
 
@@ -255,3 +274,9 @@ class Jira(JiraRestApi):
 
 	def add_comment(self, key, comment):
 		super(Jira, self).add_comment(key, comment)
+
+	def assign(self, key, assignee):
+		super(Jira, self).assign(key, assignee)
+
+	def unassign(self, key):
+		super(Jira, self).assign(key, None)

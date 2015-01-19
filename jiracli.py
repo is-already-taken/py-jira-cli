@@ -152,6 +152,43 @@ class PyJiraCli(object):
 	def comment(self, key, comment):
 		self.jira.add_comment(key, comment)
 
+	def assign(self, key, assignee):
+		users = self.jira.get_assignees(assignee)
+
+		if len(users) == 1:
+			self._assign(key, users[0])
+		elif len(users) == 0:
+			print "No user found for \"%s\"" % (assignee)
+		else:
+			print "Multiple users found for \"%s\"" % (assignee)
+			print "\n".join(str(user) for user in users)
+
+			user_id = self._prompt("Choose a user ID: ")
+
+			if user_id == None:
+				print "Cancelled."
+			else:
+				self._assign(key, filter(lambda user: user._key == user_id, users)[0])
+
+	def _assign(self, key, user):
+		print "Assigning to %s (%s)" % (user._display_name, user._key)
+		self.jira.assign(key, user._key)
+
+	def _prompt(self, text):
+		sys.stdout.write(text)
+
+		try:
+			s = sys.stdin.readline().rstrip("\n")
+		except KeyboardInterrupt as e:
+			return None
+
+		if s != "":
+			return s
+		else:
+			return None
+
+	def unassign(self, key):
+		self.jira.unassign(key)
 
 	def run(self):
 		if len(sys.argv) < 2:
@@ -171,6 +208,10 @@ class PyJiraCli(object):
 			self.comments(sys.argv[2])
 		elif cmd == "comment":
 			self.comment(sys.argv[2], sys.argv[3])
+		elif cmd == "assign":
+			self.assign(sys.argv[2], sys.argv[3])
+		elif cmd == "unassign":
+			self.unassign(sys.argv[2])
 
 
 

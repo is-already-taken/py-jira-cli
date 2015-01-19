@@ -190,6 +190,11 @@ class PyJiraCli(object):
 	def unassign(self, key):
 		self.jira.unassign(key)
 
+	def get_assignees(self, username_fragement):
+		users = self.jira.get_assignees(username_fragement)
+
+		print "\n".join(str(user) for user in users)
+
 	def run(self):
 		if len(sys.argv) < 2:
 			self._fail("Please specify a command")
@@ -212,6 +217,8 @@ class PyJiraCli(object):
 			self.assign(sys.argv[2], sys.argv[3])
 		elif cmd == "unassign":
 			self.unassign(sys.argv[2])
+		elif cmd == "assignees":
+			self.get_assignees(sys.argv[2])
 
 
 

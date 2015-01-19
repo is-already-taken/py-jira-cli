@@ -174,6 +174,22 @@ class JiraRestApi(object):
 		if status != 204:
 			raise Exception("Non 204 (%d) for %s: %s" % (status, call, str(res)))
 
+	def get_assignees(self, username_fragment):
+		if self._auth_cookies == None:
+			raise Exception("Not authenticated")
+
+		call = "/api/2/user/search?username=%s" % (username_fragment)
+
+		(status, res, _cookies) = self.http.get(
+			self._base_url + call,
+			headers=["Content-Type: application/json"],
+			cookies=self._auth_cookies)
+
+		if status != 200:
+			raise Exception("Non 200 (%d) for %s: %s" % (status, call, str(res)))
+
+		return json.loads(res, "utf8")
+
 
 JiraRestApi._CURL_VERBOSE = False
 
@@ -247,6 +263,15 @@ class Comment(object):
 	def __str__(self):
 		return "--- %d -------------------\n%s" % (self._created, self._body)
 
+class User(object):
+	def __init__(self, raw_obj):
+		self._key = raw_obj["key"].encode("utf8")
+		self._display_name = raw_obj["displayName"].encode("utf8")
+		self._email = raw_obj["emailAddress"].encode("utf8")
+
+	def __str__(self):
+		return "%s %s (%s)" % (self._key.ljust(20), self._display_name, self._email)
+
 
 class Jira(JiraRestApi):
 
@@ -280,3 +305,8 @@ class Jira(JiraRestApi):
 
 	def unassign(self, key):
 		super(Jira, self).assign(key, None)
+
+	def get_assignees(self, username_fragment):
+		users = super(Jira, self).get_assignees(username_fragment)
+
+		return map(lambda user: User(user), users)

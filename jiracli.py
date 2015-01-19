@@ -145,6 +145,14 @@ class PyJiraCli(object):
 		print self.jira.get(key)
 
 
+	def comments(self, key):
+		comments = self.jira.get_comments(key)
+		print "\n\n".join([str(comment) for comment in comments])
+
+	def comment(self, key, comment):
+		self.jira.add_comment(key, comment)
+
+
 	def run(self):
 		if len(sys.argv) < 2:
 			self._fail("Please specify a command")
@@ -159,6 +167,11 @@ class PyJiraCli(object):
 			self.jql(sys.argv[2])
 		elif cmd == "get":
 			self.get(sys.argv[2])
+		elif cmd == "comments":
+			self.comments(sys.argv[2])
+		elif cmd == "comment":
+			self.comment(sys.argv[2], sys.argv[3])
+
 
 
 if __name__ == "__main__":

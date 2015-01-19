@@ -116,6 +116,46 @@ class JiraRestApi(object):
 
 		return json.loads(res, "utf8")
 
+	def get_comments(self, key):
+		if self._auth_cookies == None:
+			raise Exception("Not authenticated")
+
+		call = "/api/2/issue/%s/comment" % (key)
+
+		(status, res, _cookies) = self.http.get(
+			self._base_url + call,
+			headers=["Content-Type: application/json"],
+			cookies=self._auth_cookies)
+
+		if status != 200:
+			raise Exception("Non 200 (%d) for %s: %s" % (status, call, str(res)))
+
+		return json.loads(res, "utf8")
+
+
+	def add_comment(self, key, comment):
+		if self._auth_cookies == None:
+			raise Exception("Not authenticated")
+
+		req_json_str = json.dumps({
+			"body": comment
+		})
+
+		call = "/api/2/issue/%s/comment" % (key)
+
+		(status, res, _cookies) = self.http.post(
+			self._base_url + call,
+			req_json_str,
+			headers=["Content-Type: application/json"],
+			cookies=self._auth_cookies)
+
+		if status != 201:
+			raise Exception("Non 201 (%d) for %s: %s" % (status, call, str(res)))
+
+		return json.loads(res, "utf8")
+
+
+
 JiraRestApi._CURL_VERBOSE = False
 
 
@@ -177,6 +217,17 @@ class Issue(BasicIssue):
 
 		return str_
 
+class Comment(object):
+	def __init__(self, raw_obj):
+		self._body = raw_obj["body"]
+
+		_created = raw_obj["created"]
+
+		self._created = time.mktime(dateutil.parser.parse(_created).timetuple())
+
+	def __str__(self):
+		return "--- %d -------------------\n%s" % (self._created, self._body)
+
 
 class Jira(JiraRestApi):
 
@@ -195,3 +246,12 @@ class Jira(JiraRestApi):
 
 	def get(self, key):
 		return Issue(super(Jira, self).get(key))
+
+	def get_comments(self, key):
+		comments = super(Jira, self).get_comments(key)
+		comments = comments["comments"]
+
+		return map(lambda comment: Comment(comment), comments)
+
+	def add_comment(self, key, comment):
+		super(Jira, self).add_comment(key, comment)

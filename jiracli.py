@@ -142,7 +142,20 @@ class PyJiraCli(object):
 				print "\n".join(" |- " + str(subtask) for subtask in issue._subtasks)
 
 	def get(self, key):
-		print self.jira.get(key)
+		issue = self.jira.get(key)
+
+		print "%s\t\tType: %s\tStatus: %s\tUpdated: %s" % (issue._key, issue._type, issue._status, issue._updated)
+		if issue._parent != None:
+			print "---------------------------------------------------------------------------"
+			print "Parent: %s" % (str(issue._parent))
+		print "---------------------------------------------------------------------------"
+		print issue._summary
+		print "==========================================================================="
+		print issue._description
+		if len(issue._subtasks) > 0:
+			print "---------------------------------------------------------------------------"
+			print "Subtasks:"
+			print "\n".join(["  - " + str(sub_task) for sub_task in issue._subtasks])
 
 
 	def comments(self, key):

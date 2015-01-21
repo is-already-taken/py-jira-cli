@@ -116,7 +116,7 @@ class PyJiraCli(object):
 
 	def _init(self):
 		# jira.JiraRestApi._CURL_VERBOSE = True
-		self.jira = jira.Jira(self.url)
+		self.jira = jira.Jira(self.url, user_agent_prefix="PyJiraCLI")
 
 		self._session = self._load_session()
 

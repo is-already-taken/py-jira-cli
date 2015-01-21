@@ -8,7 +8,7 @@ import re
 class Http(object):
 
 
-	def __init__(self, proxy=None, no_check_certificate=False, _curl_verbose=False):
+	def __init__(self, proxy=None, user_agent_prefix=None, no_check_certificate=False, _curl_verbose=False):
 		self.c = pycurl.Curl()
 
 		if proxy != None:
@@ -16,6 +16,15 @@ class Http(object):
 
 		if no_check_certificate:
 			self.c.setopt(pycurl.SSL_VERIFYPEER, 0)
+
+		if user_agent_prefix != None:
+			# prepend prefix, add pycurl UA perdefault
+			ua = user_agent_prefix + " " + pycurl.version
+		else:
+			ua = None
+
+		if ua != None:
+			self.c.setopt(pycurl.USERAGENT, ua)
 
 		self.c.setopt(pycurl.VERBOSE, 1 if _curl_verbose else 0)
 

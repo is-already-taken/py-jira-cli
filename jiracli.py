@@ -36,13 +36,13 @@ class PyJiraCli(object):
 		if not os.path.exists(config_path):
 			self._fail("Config %s not found in %s" % (CONFIG_FILE, home_path))
 
-		config = ConfigParser.RawConfigParser()
-		config.read(config_path)
+		self.config = ConfigParser.RawConfigParser()
+		self.config.read(config_path)
 
-		self.store = self._get_option(config, "store", "path", DEFAULT_STORE_PATH)
-		self.store_pw = self._get_option(config, "store", "key")
-		self.url = self._get_option(config, "jira", "url")
-		self.username = self._get_option(config, "jira", "user")
+		self.store = self._get_option(self.config, "store", "path", DEFAULT_STORE_PATH)
+		self.store_pw = self._get_option(self.config, "store", "key")
+		self.url = self._get_option(self.config, "jira", "url")
+		self.username = self._get_option(self.config, "jira", "user")
 
 		if self.store == None:
 			self._fail("No session store configured.\nPlease add [store] with path=<relative to HOME>")

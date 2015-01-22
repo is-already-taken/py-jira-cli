@@ -281,12 +281,16 @@ class Jira(JiraRestApi):
 
 		result = super(Jira, self).search(jql, max_results, fields)
 
+		issues = result["issues"]
+
 		items = []
 
-		for item in result["issues"]:
+		for item in issues:
 			items.append(Issue(item))
 
-		return items
+		remaining = result["total"] - len(issues)
+
+		return (items, remaining, result["maxResults"])
 
 
 	def get(self, key):

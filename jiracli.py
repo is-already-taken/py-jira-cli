@@ -134,12 +134,15 @@ class PyJiraCli(object):
 
 	def jql(self, jql, max_results=100):
 		# summary, assignee, reporter, status, created, updated, description, parent, project, subtasks
-		issues = self.jira.search(jql, max_results=max_results)
+		(issues, remaining_results, limited_to) = self.jira.search(jql, max_results=max_results)
 		# print "\n".join(str(issue) for issue in issues)
 		for issue in issues:
 			print issue
 			if len(issue._subtasks) > 0:
 				print "\n".join(" |- " + str(subtask) for subtask in issue._subtasks)
+
+		if remaining_results > 0:
+			print "%d Issues remaining (limited to %d)" % (remaining_results, limited_to)
 
 	def filter(self, filter_name, max_results=100):
 		jql = self._get_option(self.config, "filters", filter_name, None)

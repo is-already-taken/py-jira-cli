@@ -141,6 +141,14 @@ class PyJiraCli(object):
 			if len(issue._subtasks) > 0:
 				print "\n".join(" |- " + str(subtask) for subtask in issue._subtasks)
 
+	def filter(self, filter_name, max_results=10):
+		jql = self._get_option(self.config, "filters", filter_name, None)
+
+		if jql == None:
+			self._fail("Filter \"%s\" not found" % filter_name)
+
+		self.jql(jql, max_results=max_results)
+
 	def get(self, key):
 		issue = self.jira.get(key)
 
@@ -220,6 +228,8 @@ class PyJiraCli(object):
 
 		if cmd == "jql":
 			self.jql(sys.argv[2])
+		elif cmd == "filter":
+			self.filter(sys.argv[2])
 		elif cmd == "get":
 			self.get(sys.argv[2])
 		elif cmd == "comments":

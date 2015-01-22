@@ -132,7 +132,7 @@ class PyJiraCli(object):
 			else:
 				self._store_session()
 
-	def jql(self, jql, max_results=10):
+	def jql(self, jql, max_results=100):
 		# summary, assignee, reporter, status, created, updated, description, parent, project, subtasks
 		issues = self.jira.search(jql, max_results=max_results)
 		# print "\n".join(str(issue) for issue in issues)
@@ -141,7 +141,7 @@ class PyJiraCli(object):
 			if len(issue._subtasks) > 0:
 				print "\n".join(" |- " + str(subtask) for subtask in issue._subtasks)
 
-	def filter(self, filter_name, max_results=10):
+	def filter(self, filter_name, max_results=100):
 		jql = self._get_option(self.config, "filters", filter_name, None)
 
 		if jql == None:

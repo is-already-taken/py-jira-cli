@@ -274,12 +274,36 @@ class User(object):
 		return "%s %s (%s)" % (self._key.ljust(20), self._display_name, self._email)
 
 
-class Jira(JiraRestApi):
+class Jira(object):
+
+	def __init__(self, base_url, user_agent_prefix="PyJira"):
+		self.jira_api = JiraRestApi(base_url, user_agent_prefix=user_agent_prefix)
+
+
+	def close(self):
+		self.jira_api.close()
+
+
+	# get the auth cookies of a previous login()
+	def get_auth_cookies(self):
+		return self.jira_api.get_auth_cookies()
+
+
+	# check auth by passed session cookies and
+	# internally set the auth cookies
+	def check_auth(self, auth_cookies):
+		return self.jira_api.check_auth(auth_cookies)
+
+
+	# login
+	def login(self, username, password):
+		return self.jira_api.login(username, password)
+
 
 	def search(self, jql, max_results=10, fields=["summary", "description", "assignee", "status", "issuetype", "updated", "parent", "subtasks"]):
 		# fields: summary, description, issuetype, assignee, status, issuetype, updated, parent, subtasks#key, project, reporter, created
 
-		result = super(Jira, self).search(jql, max_results, fields)
+		result = self.jira_api.search(jql, max_results, fields)
 
 		issues = result["issues"]
 
@@ -294,24 +318,24 @@ class Jira(JiraRestApi):
 
 
 	def get(self, key):
-		return Issue(super(Jira, self).get(key))
+		return Issue(self.jira_api.get(key))
 
 	def get_comments(self, key):
-		comments = super(Jira, self).get_comments(key)
+		comments = self.jira_api.get_comments(key)
 		comments = comments["comments"]
 
 		return map(lambda comment: Comment(comment), comments)
 
 	def add_comment(self, key, comment):
-		super(Jira, self).add_comment(key, comment)
+		self.jira_api.add_comment(key, comment)
 
 	def assign(self, key, assignee):
-		super(Jira, self).assign(key, assignee)
+		self.jira_api.assign(key, assignee)
 
 	def unassign(self, key):
-		super(Jira, self).assign(key, None)
+		self.jira_api.assign(key, None)
 
 	def get_assignees(self, username_fragment):
-		users = super(Jira, self).get_assignees(username_fragment)
+		users = self.jira_api.get_assignees(username_fragment)
 
 		return map(lambda user: User(user), users)

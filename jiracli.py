@@ -6,6 +6,7 @@ import crypt
 import getpass
 import jira
 import datetime
+from textwrap import wrap
 
 # in $HOME
 CONFIG_FILE=".pyjirarc"
@@ -158,16 +159,18 @@ class PyJiraCli(object):
 
 		_formatted_date = datetime.datetime.utcfromtimestamp(issue._updated).strftime("%d.%m.%y %H:%M")
 
-		print "%s\t\tType: %s\tStatus: %s\tUpdated: %s" % (issue._key, issue._type, issue._status, _formatted_date)
+		print "%s\tType: %s\tStatus: %s" % (issue._key, issue._type, issue._status)
+		print "-" * 80
+		print "Updated: %s" % (_formatted_date)
 		if issue._parent != None:
-			print "---------------------------------------------------------------------------"
+			print "-" * 80
 			print "Parent: %s" % (str(issue._parent))
-		print "---------------------------------------------------------------------------"
+		print "-" * 80
 		print issue._summary
-		print "==========================================================================="
-		print issue._description
+		print "=" * 80
+		print "\n".join(wrap(issue._description, width=80))
 		if len(issue._subtasks) > 0:
-			print "---------------------------------------------------------------------------"
+			print "-" * 80
 			print "Subtasks:"
 			print "\n".join(["  - " + str(sub_task) for sub_task in issue._subtasks])
 

@@ -5,6 +5,7 @@ import ConfigParser
 import crypt
 import getpass
 import jira
+import datetime
 
 # in $HOME
 CONFIG_FILE=".pyjirarc"
@@ -155,7 +156,9 @@ class PyJiraCli(object):
 	def get(self, key):
 		issue = self.jira.get(key)
 
-		print "%s\t\tType: %s\tStatus: %s\tUpdated: %s" % (issue._key, issue._type, issue._status, issue._updated)
+		_formatted_date = datetime.datetime.utcfromtimestamp(issue._updated).strftime("%d.%m.%y %H:%M")
+
+		print "%s\t\tType: %s\tStatus: %s\tUpdated: %s" % (issue._key, issue._type, issue._status, _formatted_date)
 		if issue._parent != None:
 			print "---------------------------------------------------------------------------"
 			print "Parent: %s" % (str(issue._parent))

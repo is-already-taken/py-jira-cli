@@ -7,12 +7,13 @@ import time
 class JiraRestApi(object):
 
 	# base_url = .../jira/rest
-	def __init__(self, base_url, user_agent_prefix="PyJira"):
+	def __init__(self, base_url, user_agent_prefix="PyJira", proxy=None):
 		self._base_url = base_url
 		# also tells if this instance is authenticated
 		self._auth_cookies = None
 
 		self.http = http.Http(
+			proxy=proxy,
 			user_agent_prefix=user_agent_prefix,
 			_curl_verbose=JiraRestApi._CURL_VERBOSE)
 
@@ -276,8 +277,8 @@ class User(object):
 
 class Jira(object):
 
-	def __init__(self, base_url, user_agent_prefix="PyJira"):
-		self.jira_api = JiraRestApi(base_url, user_agent_prefix=user_agent_prefix)
+	def __init__(self, base_url, user_agent_prefix="PyJira", proxy=None):
+		self.jira_api = JiraRestApi(base_url, user_agent_prefix=user_agent_prefix, proxy=proxy)
 
 
 	def close(self):

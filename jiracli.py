@@ -43,6 +43,7 @@ class PyJiraCli(object):
 
 		self.store = self._get_option(self.config, "store", "path", DEFAULT_STORE_PATH)
 		self.store_pw = self._get_option(self.config, "store", "key")
+		self.proxy = self._get_option(self.config, "network", "proxy")
 		self.url = self._get_option(self.config, "jira", "url")
 		self.username = self._get_option(self.config, "jira", "user")
 
@@ -118,7 +119,7 @@ class PyJiraCli(object):
 
 	def _init(self):
 		# jira.JiraRestApi._CURL_VERBOSE = True
-		self.jira = jira.Jira(self.url, user_agent_prefix="PyJiraCLI")
+		self.jira = jira.Jira(self.url, user_agent_prefix="PyJiraCLI", proxy=self.proxy)
 
 		self._session = self._load_session()
 

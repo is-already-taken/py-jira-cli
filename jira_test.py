@@ -10,7 +10,7 @@ class JiraRestApiTest(unittest.TestCase):
 	@fudge.patch("http.Http")
 	def test_init_with_no_ua(self, Http_Mock):
 		(Http_Mock.expects_call()
-					.with_args(_curl_verbose=False, user_agent_prefix="PyJira")
+					.with_args(_curl_verbose=False, user_agent_prefix="PyJira", proxy=None)
 					.returns_fake())
 
 		jira.JiraRestApi("http://host/base")
@@ -19,16 +19,25 @@ class JiraRestApiTest(unittest.TestCase):
 	@fudge.patch("http.Http")
 	def test_init_with_ua(self, Http_Mock):
 		(Http_Mock.expects_call()
-					.with_args(_curl_verbose=False, user_agent_prefix="PyJira")
+					.with_args(_curl_verbose=False, user_agent_prefix="PyJira", proxy=None)
 					.returns_fake())
 
 		jira.JiraRestApi("http://host/base")
 
 
 	@fudge.patch("http.Http")
+	def test_init_with_proxy(self, Http_Mock):
+		(Http_Mock.expects_call()
+					.with_args(_curl_verbose=False, user_agent_prefix="PyJira", proxy="socks://1.2.3.4:6789")
+					.returns_fake())
+
+		jira.JiraRestApi("http://host/base", proxy="socks://1.2.3.4:6789")
+
+
+	@fudge.patch("http.Http")
 	def test_close(self, Http_Mock):
 		(Http_Mock.expects_call()
-					.with_args(_curl_verbose=False, user_agent_prefix="Custom")
+					.with_args(_curl_verbose=False, user_agent_prefix="Custom", proxy=None)
 					.returns_fake()
 					.expects('close'))
 
@@ -39,7 +48,7 @@ class JiraRestApiTest(unittest.TestCase):
 	@fudge.patch("http.Http")
 	def test_get_auth_cookies_uninitialized(self, Http_Mock):
 		(Http_Mock.expects_call()
-					.with_args(_curl_verbose=False, user_agent_prefix="Custom")
+					.with_args(_curl_verbose=False, user_agent_prefix="Custom", proxy=None)
 					.returns_fake())
 
 		api = jira.JiraRestApi("http://host/base", user_agent_prefix="Custom")
@@ -50,7 +59,7 @@ class JiraRestApiTest(unittest.TestCase):
 	@fudge.patch("http.Http")
 	def test_check_auth_successfully_authorized(self, Http_Mock):
 		(Http_Mock.expects_call()
-					.with_args(_curl_verbose=False, user_agent_prefix="PyJira")
+					.with_args(_curl_verbose=False, user_agent_prefix="PyJira", proxy=None)
 					.returns_fake()
 					.expects('get')
 						.with_args("http://host/base/auth/1/session", cookies=["A", "B"])
@@ -68,7 +77,7 @@ class JiraRestApiTest(unittest.TestCase):
 	@fudge.patch("http.Http")
 	def test_check_auth_not_authorized(self, Http_Mock):
 		(Http_Mock.expects_call()
-					.with_args(_curl_verbose=False, user_agent_prefix="PyJira")
+					.with_args(_curl_verbose=False, user_agent_prefix="PyJira", proxy=None)
 					.returns_fake()
 					.provides('get')
 						.with_args("http://host/base/auth/1/session", cookies=["A", "B"])
@@ -101,7 +110,7 @@ class JiraRestApiTest(unittest.TestCase):
 		]
 
 		(Http_Mock.expects_call()
-					.with_args(_curl_verbose=False, user_agent_prefix="PyJira")
+					.with_args(_curl_verbose=False, user_agent_prefix="PyJira", proxy=None)
 					.returns_fake()
 					.expects('post')
 						.with_args("http://host/base/gadget/1.0/login", request_form_json)
@@ -135,7 +144,7 @@ class JiraRestApiTest(unittest.TestCase):
 		]
 
 		(Http_Mock.expects_call()
-					.with_args(_curl_verbose=False, user_agent_prefix="PyJira")
+					.with_args(_curl_verbose=False, user_agent_prefix="PyJira", proxy=None)
 					.returns_fake()
 					.expects('post')
 						.with_args("http://host/base/gadget/1.0/login", request_form_json)
@@ -161,7 +170,7 @@ class JiraRestApiTest(unittest.TestCase):
 		})
 
 		(Http_Mock.expects_call()
-					.with_args(_curl_verbose=False, user_agent_prefix="PyJira")
+					.with_args(_curl_verbose=False, user_agent_prefix="PyJira", proxy=None)
 					.returns_fake()
 					.provides('post')
 						.with_args(
@@ -190,7 +199,7 @@ class JiraRestApiTest(unittest.TestCase):
 		})
 
 		(Http_Mock.expects_call()
-					.with_args(_curl_verbose=False, user_agent_prefix="PyJira")
+					.with_args(_curl_verbose=False, user_agent_prefix="PyJira", proxy=None)
 					.returns_fake()
 					.expects('post')
 						.with_args(
@@ -226,7 +235,7 @@ class JiraRestApiTest(unittest.TestCase):
 		})
 
 		(Http_Mock.expects_call()
-					.with_args(_curl_verbose=False, user_agent_prefix="PyJira")
+					.with_args(_curl_verbose=False, user_agent_prefix="PyJira", proxy=None)
 					.returns_fake()
 					.expects('post')
 						.with_args(
@@ -248,7 +257,7 @@ class JiraRestApiTest(unittest.TestCase):
 	@fudge.patch("http.Http")
 	def test_get_unauthorized(self, Http_Mock):
 		(Http_Mock.expects_call()
-					.with_args(_curl_verbose=False, user_agent_prefix="PyJira")
+					.with_args(_curl_verbose=False, user_agent_prefix="PyJira", proxy=None)
 					.returns_fake()
 					.provides('get')
 						.with_args(
@@ -270,7 +279,7 @@ class JiraRestApiTest(unittest.TestCase):
 		})
 
 		(Http_Mock.expects_call()
-					.with_args(_curl_verbose=False, user_agent_prefix="PyJira")
+					.with_args(_curl_verbose=False, user_agent_prefix="PyJira", proxy=None)
 					.returns_fake()
 					.expects('get')
 						.with_args(
@@ -299,7 +308,7 @@ class JiraRestApiTest(unittest.TestCase):
 		})
 
 		(Http_Mock.expects_call()
-					.with_args(_curl_verbose=False, user_agent_prefix="PyJira")
+					.with_args(_curl_verbose=False, user_agent_prefix="PyJira", proxy=None)
 					.returns_fake()
 					.expects('get')
 						.with_args(
@@ -320,7 +329,7 @@ class JiraRestApiTest(unittest.TestCase):
 	@fudge.patch("http.Http")
 	def test_get_comments_unauthorized(self, Http_Mock):
 		(Http_Mock.expects_call()
-					.with_args(_curl_verbose=False, user_agent_prefix="PyJira")
+					.with_args(_curl_verbose=False, user_agent_prefix="PyJira", proxy=None)
 					.returns_fake()
 					.provides('get')
 						.with_args(
@@ -342,7 +351,7 @@ class JiraRestApiTest(unittest.TestCase):
 		})
 
 		(Http_Mock.expects_call()
-					.with_args(_curl_verbose=False, user_agent_prefix="PyJira")
+					.with_args(_curl_verbose=False, user_agent_prefix="PyJira", proxy=None)
 					.returns_fake()
 					.expects('get')
 						.with_args(
@@ -371,7 +380,7 @@ class JiraRestApiTest(unittest.TestCase):
 		})
 
 		(Http_Mock.expects_call()
-					.with_args(_curl_verbose=False, user_agent_prefix="PyJira")
+					.with_args(_curl_verbose=False, user_agent_prefix="PyJira", proxy=None)
 					.returns_fake()
 					.expects('get')
 						.with_args(
@@ -396,7 +405,7 @@ class JiraRestApiTest(unittest.TestCase):
 		}
 
 		(Http_Mock.expects_call()
-					.with_args(_curl_verbose=False, user_agent_prefix="PyJira")
+					.with_args(_curl_verbose=False, user_agent_prefix="PyJira", proxy=None)
 					.returns_fake()
 					.provides('post')
 						.with_args(
@@ -422,7 +431,7 @@ class JiraRestApiTest(unittest.TestCase):
 		})
 
 		(Http_Mock.expects_call()
-					.with_args(_curl_verbose=False, user_agent_prefix="PyJira")
+					.with_args(_curl_verbose=False, user_agent_prefix="PyJira", proxy=None)
 					.returns_fake()
 					.expects('post')
 						.with_args(
@@ -454,7 +463,7 @@ class JiraRestApiTest(unittest.TestCase):
 		})
 
 		(Http_Mock.expects_call()
-					.with_args(_curl_verbose=False, user_agent_prefix="PyJira")
+					.with_args(_curl_verbose=False, user_agent_prefix="PyJira", proxy=None)
 					.returns_fake()
 					.expects('post')
 						.with_args(
@@ -480,7 +489,7 @@ class JiraRestApiTest(unittest.TestCase):
 		})
 
 		(Http_Mock.expects_call()
-					.with_args(_curl_verbose=False, user_agent_prefix="PyJira")
+					.with_args(_curl_verbose=False, user_agent_prefix="PyJira", proxy=None)
 					.returns_fake()
 					.provides('put')
 						.with_args(
@@ -502,7 +511,7 @@ class JiraRestApiTest(unittest.TestCase):
 		})
 
 		(Http_Mock.expects_call()
-					.with_args(_curl_verbose=False, user_agent_prefix="PyJira")
+					.with_args(_curl_verbose=False, user_agent_prefix="PyJira", proxy=None)
 					.returns_fake()
 					.expects('put')
 						.with_args(
@@ -532,7 +541,7 @@ class JiraRestApiTest(unittest.TestCase):
 		})
 
 		(Http_Mock.expects_call()
-					.with_args(_curl_verbose=False, user_agent_prefix="PyJira")
+					.with_args(_curl_verbose=False, user_agent_prefix="PyJira", proxy=None)
 					.returns_fake()
 					.expects('put')
 						.with_args(
@@ -554,7 +563,7 @@ class JiraRestApiTest(unittest.TestCase):
 	@fudge.patch("http.Http")
 	def test_get_assignees_unauthorized(self, Http_Mock):
 		(Http_Mock.expects_call()
-					.with_args(_curl_verbose=False, user_agent_prefix="PyJira")
+					.with_args(_curl_verbose=False, user_agent_prefix="PyJira", proxy=None)
 					.returns_fake()
 					.provides('get')
 						.with_args(
@@ -575,7 +584,7 @@ class JiraRestApiTest(unittest.TestCase):
 		})
 
 		(Http_Mock.expects_call()
-					.with_args(_curl_verbose=False, user_agent_prefix="PyJira")
+					.with_args(_curl_verbose=False, user_agent_prefix="PyJira", proxy=None)
 					.returns_fake()
 					.expects('get')
 						.with_args(
@@ -600,7 +609,7 @@ class JiraRestApiTest(unittest.TestCase):
 		})
 
 		(Http_Mock.expects_call()
-					.with_args(_curl_verbose=False, user_agent_prefix="PyJira")
+					.with_args(_curl_verbose=False, user_agent_prefix="PyJira", proxy=None)
 					.returns_fake()
 					.expects('get')
 						.with_args(
@@ -626,7 +635,7 @@ class JiraTest(unittest.TestCase):
 	@fudge.patch("jira.JiraRestApi")
 	def test_init_with_no_ua(self, JiraRestApi_Mock):
 		(JiraRestApi_Mock.expects_call()
-					.with_args("http://host/base", user_agent_prefix="PyJira")
+					.with_args("http://host/base", user_agent_prefix="PyJira", proxy=None)
 					.returns_fake())
 
 		jira.Jira("http://host/base")
@@ -634,7 +643,7 @@ class JiraTest(unittest.TestCase):
 	@fudge.patch("jira.JiraRestApi")
 	def test_init_with_custom_ua(self, JiraRestApi_Mock):
 		(JiraRestApi_Mock.expects_call()
-					.with_args("http://host/base", user_agent_prefix="Custom")
+					.with_args("http://host/base", user_agent_prefix="Custom", proxy=None)
 					.returns_fake())
 
 		jira.Jira("http://host/base", user_agent_prefix="Custom")
@@ -644,7 +653,7 @@ class JiraTest(unittest.TestCase):
 	@fudge.patch("jira.JiraRestApi")
 	def test_close(self, JiraRestApi_Mock):
 		(JiraRestApi_Mock.expects_call()
-					.with_args("http://host/base", user_agent_prefix="PyJira")
+					.with_args("http://host/base", user_agent_prefix="PyJira", proxy=None)
 					.returns_fake()
 					.expects('close'))
 
@@ -656,7 +665,7 @@ class JiraTest(unittest.TestCase):
 	@fudge.patch("jira.JiraRestApi")
 	def test_get_auth_cookies(self, JiraRestApi_Mock):
 		(JiraRestApi_Mock.expects_call()
-					.with_args("http://host/base", user_agent_prefix="PyJira")
+					.with_args("http://host/base", user_agent_prefix="PyJira", proxy=None)
 					.returns_fake()
 					.expects('get_auth_cookies')
 						.returns( ["A", "B"] ))
@@ -669,7 +678,7 @@ class JiraTest(unittest.TestCase):
 	@fudge.patch("jira.JiraRestApi")
 	def test_check_auth(self, JiraRestApi_Mock):
 		(JiraRestApi_Mock.expects_call()
-					.with_args("http://host/base", user_agent_prefix="PyJira")
+					.with_args("http://host/base", user_agent_prefix="PyJira", proxy=None)
 					.returns_fake()
 					.expects('check_auth')
 						.with_args( ["a", "b"] )
@@ -683,7 +692,7 @@ class JiraTest(unittest.TestCase):
 	@fudge.patch("jira.JiraRestApi")
 	def test_login_success(self, JiraRestApi_Mock):
 		(JiraRestApi_Mock.expects_call()
-					.with_args("http://host/base", user_agent_prefix="PyJira")
+					.with_args("http://host/base", user_agent_prefix="PyJira", proxy=None)
 					.returns_fake()
 					.expects('login')
 						.with_args("USERNAME", "PASSWORD")
@@ -697,7 +706,7 @@ class JiraTest(unittest.TestCase):
 	@fudge.patch("jira.JiraRestApi")
 	def test_login_fail(self, JiraRestApi_Mock):
 		(JiraRestApi_Mock.expects_call()
-					.with_args("http://host/base", user_agent_prefix="PyJira")
+					.with_args("http://host/base", user_agent_prefix="PyJira", proxy=None)
 					.returns_fake()
 					.expects('login')
 						.with_args("USERNAME", "PASSWORD")
@@ -729,7 +738,7 @@ class JiraTest(unittest.TestCase):
 					.returns_fake())
 
 		(JiraRestApi_Mock.expects_call()
-					.with_args("http://host/base", user_agent_prefix="PyJira")
+					.with_args("http://host/base", user_agent_prefix="PyJira", proxy=None)
 					.returns_fake()
 					.expects('search')
 						.with_args(jql, count, fields)
@@ -851,7 +860,7 @@ class JiraTest(unittest.TestCase):
 		}
 
 		(JiraRestApi_Mock.expects_call()
-					.with_args("http://host/base", user_agent_prefix="PyJira")
+					.with_args("http://host/base", user_agent_prefix="PyJira", proxy=None)
 					.returns_fake()
 					.expects('get')
 						.with_args("KEY-12345")
@@ -907,7 +916,7 @@ class JiraTest(unittest.TestCase):
 		}
 
 		(JiraRestApi_Mock.expects_call()
-					.with_args("http://host/base", user_agent_prefix="PyJira")
+					.with_args("http://host/base", user_agent_prefix="PyJira", proxy=None)
 					.returns_fake()
 					.expects('get')
 						.with_args("KEY-12345")
@@ -940,7 +949,7 @@ class JiraTest(unittest.TestCase):
 		}
 
 		(JiraRestApi_Mock.expects_call()
-					.with_args("http://host/base", user_agent_prefix="PyJira")
+					.with_args("http://host/base", user_agent_prefix="PyJira", proxy=None)
 					.returns_fake()
 					.expects('get_comments')
 						.with_args("KEY-12345")
@@ -960,7 +969,7 @@ class JiraTest(unittest.TestCase):
 	@fudge.patch("jira.JiraRestApi")
 	def test_add_comment(self, JiraRestApi_Mock):
 		(JiraRestApi_Mock.expects_call()
-					.with_args("http://host/base", user_agent_prefix="PyJira")
+					.with_args("http://host/base", user_agent_prefix="PyJira", proxy=None)
 					.returns_fake()
 					.expects('add_comment')
 						.with_args("KEY-12345", "New comment"))
@@ -974,7 +983,7 @@ class JiraTest(unittest.TestCase):
 	@fudge.patch("jira.JiraRestApi")
 	def test_assign(self, JiraRestApi_Mock):
 		(JiraRestApi_Mock.expects_call()
-					.with_args("http://host/base", user_agent_prefix="PyJira")
+					.with_args("http://host/base", user_agent_prefix="PyJira", proxy=None)
 					.returns_fake()
 					.expects('assign')
 						.with_args("KEY-12345", "user name"))
@@ -987,7 +996,7 @@ class JiraTest(unittest.TestCase):
 	@fudge.patch("jira.JiraRestApi")
 	def test_unassign(self, JiraRestApi_Mock):
 		(JiraRestApi_Mock.expects_call()
-					.with_args("http://host/base", user_agent_prefix="PyJira")
+					.with_args("http://host/base", user_agent_prefix="PyJira", proxy=None)
 					.returns_fake()
 					.expects('assign')
 						.with_args("KEY-12345", None))
@@ -1005,7 +1014,7 @@ class JiraTest(unittest.TestCase):
 		]
 
 		(JiraRestApi_Mock.expects_call()
-					.with_args("http://host/base", user_agent_prefix="PyJira")
+					.with_args("http://host/base", user_agent_prefix="PyJira", proxy=None)
 					.returns_fake()
 					.expects('get_assignees')
 						.with_args("user na")

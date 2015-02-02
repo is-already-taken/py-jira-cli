@@ -330,8 +330,24 @@ class PyJiraCli(object):
 		self._read_config()
 		self._init()
 
-		# run configured subcommand with parsed args
-		parsed.func(parsed)
+
+		try:
+			# run configured subcommand with parsed args
+			parsed.func(parsed)
+
+		except jira.JiraStatusException as jse:
+			messages = jse.get_messages()
+
+			if len(messages) > 1:
+				messages = "\n- " + ("\n- ".join(messages))
+			else:
+				messages = messages[0]
+
+			print "Jira error (%d): %s" % (jse.get_status(), messages)
+
+		except jira.JiraAuthException as jae:
+			print jae
+
 
 if __name__ == "__main__":
 	cli = PyJiraCli()

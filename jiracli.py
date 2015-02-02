@@ -8,6 +8,7 @@ import jira
 import datetime
 from textwrap import wrap
 import argparse
+from release import VERSION, BINARY_NAME
 
 # in $HOME
 CONFIG_FILE=".pyjirarc"
@@ -243,7 +244,7 @@ class PyJiraCli(object):
 
 	def run(self):
 		parser = argparse.ArgumentParser(
-			prog="pyjiracli",
+			prog=BINARY_NAME,
 			description="Interact with JIRA using the command line interface.",
 			epilog="See %(prog)s COMMAND --help for detailed help on a command"
 		)
@@ -251,7 +252,7 @@ class PyJiraCli(object):
 		parser.add_argument(
 			'-V','--version',
 			action='version',
-			version='%(prog)s 0.1')
+			version='%(prog)s ' + VERSION)
 
 
 		subparsers = parser.add_subparsers(

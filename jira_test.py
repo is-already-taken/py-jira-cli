@@ -182,7 +182,7 @@ class JiraRestApiTest(unittest.TestCase):
 
 		api = jira.JiraRestApi("http://host/base")
 
-		self.assertRaises(Exception, api.search, "SOME JQL WITH A = 1")
+		self.assertRaises(jira.JiraAuthException, api.search, "SOME JQL WITH A = 1")
 
 
 	@fudge.patch("http.Http")
@@ -251,7 +251,7 @@ class JiraRestApiTest(unittest.TestCase):
 		# TODO find a way to easily "dummy check" auth here
 		api._auth_cookies = ["A", "B"]
 
-		self.assertRaises(Exception, api.search, "SOME JQL WITH A = 1")
+		self.assertRaises(jira.JiraStatusException, api.search, "SOME JQL WITH A = 1")
 
 
 	@fudge.patch("http.Http")
@@ -268,7 +268,7 @@ class JiraRestApiTest(unittest.TestCase):
 
 		api = jira.JiraRestApi("http://host/base")
 
-		self.assertRaises(Exception, api.get, "KEY-12345")
+		self.assertRaises(jira.JiraAuthException, api.get, "KEY-12345")
 
 
 	@fudge.patch("http.Http")
@@ -323,7 +323,7 @@ class JiraRestApiTest(unittest.TestCase):
 		# TODO find a way to easily "dummy check" auth here
 		api._auth_cookies = ["A", "B"]
 
-		self.assertRaises(Exception, api.get, "KEY-12345")
+		self.assertRaises(jira.JiraStatusException, api.get, "KEY-12345")
 
 
 	@fudge.patch("http.Http")
@@ -340,7 +340,7 @@ class JiraRestApiTest(unittest.TestCase):
 
 		api = jira.JiraRestApi("http://host/base")
 
-		self.assertRaises(Exception, api.get_comments, "KEY-12345")
+		self.assertRaises(jira.JiraAuthException, api.get_comments, "KEY-12345")
 
 
 	@fudge.patch("http.Http")
@@ -395,7 +395,7 @@ class JiraRestApiTest(unittest.TestCase):
 		# TODO find a way to easily "dummy check" auth here
 		api._auth_cookies = ["A", "B"]
 
-		self.assertRaises(Exception, api.get_comments, "KEY-12345")
+		self.assertRaises(jira.JiraStatusException, api.get_comments, "KEY-12345")
 
 
 	@fudge.patch("http.Http")
@@ -417,7 +417,7 @@ class JiraRestApiTest(unittest.TestCase):
 
 		api = jira.JiraRestApi("http://host/base")
 
-		self.assertRaises(Exception, api.add_comment, "KEY-12345", "Some commment")
+		self.assertRaises(jira.JiraAuthException, api.add_comment, "KEY-12345", "Some commment")
 
 
 	@fudge.patch("http.Http")
@@ -479,7 +479,7 @@ class JiraRestApiTest(unittest.TestCase):
 		# TODO find a way to easily "dummy check" auth here
 		api._auth_cookies = ["A", "B"]
 
-		self.assertRaises(Exception, api.add_comment, "KEY-12345", "Some comment")
+		self.assertRaises(jira.JiraStatusException, api.add_comment, "KEY-12345", "Some comment")
 
 
 	@fudge.patch("http.Http")
@@ -501,7 +501,7 @@ class JiraRestApiTest(unittest.TestCase):
 
 		api = jira.JiraRestApi("http://host/base")
 
-		self.assertRaises(Exception, api.assign, "KEY-12345", "Some name")
+		self.assertRaises(jira.JiraAuthException, api.assign, "KEY-12345", "Some name")
 
 
 	@fudge.patch("http.Http")
@@ -557,7 +557,7 @@ class JiraRestApiTest(unittest.TestCase):
 		# TODO find a way to easily "dummy check" auth here
 		api._auth_cookies = ["A", "B"]
 
-		self.assertRaises(Exception, api.assign, "KEY-12345", "Some name")
+		self.assertRaises(jira.JiraStatusException, api.assign, "KEY-12345", "Some name")
 
 
 	@fudge.patch("http.Http")
@@ -574,7 +574,7 @@ class JiraRestApiTest(unittest.TestCase):
 
 		api = jira.JiraRestApi("http://host/base")
 
-		self.assertRaises(Exception, api.get_assignees, "Some name")
+		self.assertRaises(jira.JiraAuthException, api.get_assignees, "Some name")
 
 
 	@fudge.patch("http.Http")
@@ -624,7 +624,7 @@ class JiraRestApiTest(unittest.TestCase):
 		# TODO find a way to easily "dummy check" auth here
 		api._auth_cookies = ["A", "B"]
 
-		self.assertRaises(Exception, api.get_assignees, "Some name")
+		self.assertRaises(jira.JiraStatusException, api.get_assignees, "Some name")
 
 
 

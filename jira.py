@@ -81,7 +81,7 @@ class JiraRestApi(object):
 
 	def search(self, jql, max_results=10, fields=["summary", "status"]):
 		if self._auth_cookies == None:
-			raise Exception("Not authenticated")
+			raise JiraAuthException("Not authenticated")
 
 		req_json_str = json.dumps({
 			"jql": jql,
@@ -98,13 +98,13 @@ class JiraRestApi(object):
 			cookies=self._auth_cookies)
 
 		if status != 200:
-			raise Exception("Non 200 (%d) for %s: %s" % (status, call, str(res)))
+			raise JiraStatusException(status, call, str(res))
 
 		return json.loads(res, "utf8")
 
 	def get(self, key):
 		if self._auth_cookies == None:
-			raise Exception("Not authenticated")
+			raise JiraAuthException("Not authenticated")
 
 		call = "/api/2/issue/%s" % (key)
 
@@ -114,13 +114,13 @@ class JiraRestApi(object):
 			cookies=self._auth_cookies)
 
 		if status != 200:
-			raise Exception("Non 200 (%d) for %s: %s" % (status, call, str(res)))
+			raise JiraStatusException(status, call, str(res))
 
 		return json.loads(res, "utf8")
 
 	def get_comments(self, key):
 		if self._auth_cookies == None:
-			raise Exception("Not authenticated")
+			raise JiraAuthException("Not authenticated")
 
 		call = "/api/2/issue/%s/comment" % (key)
 
@@ -130,14 +130,14 @@ class JiraRestApi(object):
 			cookies=self._auth_cookies)
 
 		if status != 200:
-			raise Exception("Non 200 (%d) for %s: %s" % (status, call, str(res)))
+			raise JiraStatusException(status, call, str(res))
 
 		return json.loads(res, "utf8")
 
 
 	def add_comment(self, key, comment):
 		if self._auth_cookies == None:
-			raise Exception("Not authenticated")
+			raise JiraAuthException("Not authenticated")
 
 		req_json_str = json.dumps({
 			"body": comment
@@ -152,14 +152,14 @@ class JiraRestApi(object):
 			cookies=self._auth_cookies)
 
 		if status != 201:
-			raise Exception("Non 201 (%d) for %s: %s" % (status, call, str(res)))
+			raise JiraStatusException(status, call, str(res))
 
 		return json.loads(res, "utf8")
 
 
 	def assign(self, key, assignee):
 		if self._auth_cookies == None:
-			raise Exception("Not authenticated")
+			raise JiraAuthException("Not authenticated")
 
 		req_json_str = json.dumps({
 			"name": assignee
@@ -174,11 +174,11 @@ class JiraRestApi(object):
 			cookies=self._auth_cookies)
 
 		if status != 204:
-			raise Exception("Non 204 (%d) for %s: %s" % (status, call, str(res)))
+			raise JiraStatusException(status, call, str(res))
 
 	def get_assignees(self, username_fragment):
 		if self._auth_cookies == None:
-			raise Exception("Not authenticated")
+			raise JiraAuthException("Not authenticated")
 
 		call = "/api/2/user/search?username=%s" % (username_fragment)
 
@@ -188,9 +188,44 @@ class JiraRestApi(object):
 			cookies=self._auth_cookies)
 
 		if status != 200:
-			raise Exception("Non 200 (%d) for %s: %s" % (status, call, str(res)))
+			raise JiraStatusException(status, call, str(res))
 
 		return json.loads(res, "utf8")
+
+
+
+class JiraStatusException(BaseException):
+
+	def __init__(self, status, call_name, response_data):
+		self.status = status
+		self.call_name = call_name
+		self.response_data = response_data
+
+	def get_status(self):
+		return self.status
+
+	def get_call_name(self):
+		return self.call_name
+
+	def get_messages(self):
+		if self.response_data != None:
+			try:
+				data = json.loads(self.response_data)
+				if "errorMessages" in data:
+					return data["errorMessages"]
+				else:
+					return [self.response_data]
+			except:
+				return [self.response_data]
+
+	def __str__(self):
+		return "Non 200 (%d) for %s: %s" % (self.status, self.call_name, self.response_data)
+
+class JiraAuthException(BaseException):
+
+	def __init__(self, message):
+		super(BaseException, self).__init__(message)
+
 
 
 JiraRestApi._CURL_VERBOSE = False

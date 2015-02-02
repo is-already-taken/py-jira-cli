@@ -454,9 +454,9 @@ class JiraRestApiTest(unittest.TestCase):
 
 	@fudge.patch("http.Http")
 	def test_add_comment_unsuccessful(self, Http_Mock):
-		request_form_json = {
+		request_form_json = json.dumps({
 			"body": "Some comment"
-		}
+		})
 
 		response_json_str = json.dumps({
 			"error": "response json"

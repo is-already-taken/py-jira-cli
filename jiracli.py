@@ -7,6 +7,7 @@ import getpass
 import jira
 import datetime
 from textwrap import wrap
+import argparse
 
 # in $HOME
 CONFIG_FILE=".pyjirarc"
@@ -135,9 +136,10 @@ class PyJiraCli(object):
 			else:
 				self._store_session()
 
-	def jql(self, jql, max_results=100):
+	def _query(self, query):
 		# summary, assignee, reporter, status, created, updated, description, parent, project, subtasks
-		(issues, remaining_results, limited_to) = self.jira.search(jql, max_results=max_results)
+
+		(issues, remaining_results, limited_to) = self.jira.search(query)
 		# print "\n".join(str(issue) for issue in issues)
 		for issue in issues:
 			print issue
@@ -147,16 +149,21 @@ class PyJiraCli(object):
 		if remaining_results > 0:
 			print "%d Issues remaining (limited to %d)" % (remaining_results, limited_to)
 
-	def filter(self, filter_name, max_results=100):
-		jql = self._get_option(self.config, "filters", filter_name, None)
+	def query(self, args):
+		query = " ".join(args.query)
+
+		self._query(query)
+
+	def filter(self, args):
+		jql = self._get_option(self.config, "filters", args.name, None)
 
 		if jql == None:
-			self._fail("Filter \"%s\" not found" % filter_name)
+			self._fail("Filter \"%s\" not found" % args.name)
 
-		self.jql(jql, max_results=max_results)
+		self._query(jql)
 
-	def get(self, key):
-		issue = self.jira.get(key)
+	def get(self, args):
+		issue = self.jira.get(args.key)
 
 		_formatted_date = datetime.datetime.utcfromtimestamp(issue._updated).strftime("%d.%m.%y %H:%M")
 
@@ -176,22 +183,22 @@ class PyJiraCli(object):
 			print "\n".join(["  - " + str(sub_task) for sub_task in issue._subtasks])
 
 
-	def comments(self, key):
-		comments = self.jira.get_comments(key)
+	def comments(self, args):
+		comments = self.jira.get_comments(args.key)
 		print "\n\n".join([str(comment) for comment in comments])
 
-	def comment(self, key, comment):
-		self.jira.add_comment(key, comment)
+	def comment(self, args):
+		self.jira.add_comment(args.key, " ".join(args.comment))
 
-	def assign(self, key, assignee):
-		users = self.jira.get_assignees(assignee)
+	def assign(self, args):
+		users = self.jira.get_assignees(args.name)
 
 		if len(users) == 1:
-			self._assign(key, users[0])
+			self._assign(args.key, users[0])
 		elif len(users) == 0:
-			print "No user found for \"%s\"" % (assignee)
+			print "No user found for \"%s\"" % (args.name)
 		else:
-			print "Multiple users found for \"%s\"" % (assignee)
+			print "Multiple users found for \"%s\"" % (args.name)
 			print "\n".join(str(user) for user in users)
 
 			user_id = self._prompt("Choose a user ID: ")
@@ -218,42 +225,112 @@ class PyJiraCli(object):
 		else:
 			return None
 
-	def unassign(self, key):
-		self.jira.unassign(key)
+	def unassign(self, args):
+		self.jira.unassign(args.key)
 
-	def get_assignees(self, username_fragement):
-		users = self.jira.get_assignees(username_fragement)
+	def assignees(self, args):
+		users = self.jira.get_assignees(args.username_fragement)
 
 		print "\n".join(str(user) for user in users)
 
+	def _parse_args(self):
+		parser = argparse.ArgumentParser()
+		subparsers = parser.add_subparsers(
+			title='subcommands',
+			description='valid subcommands',
+			help='additional help')
+
+
 	def run(self):
-		if len(sys.argv) < 2:
-			self._fail("Please specify a command")
+		parser = argparse.ArgumentParser(
+			prog="pyjiracli",
+			description="Interact with JIRA using the command line interface.",
+			epilog="See %(prog)s COMMAND --help for detailed help on a command"
+		)
+
+		parser.add_argument(
+			'-V','--version',
+			action='version',
+			version='%(prog)s 0.1')
+
+
+		subparsers = parser.add_subparsers(
+			title='COMMANDS')
+
+		parser_add = subparsers.add_parser('jql', help="Query by JQL")
+		parser_add.set_defaults(func=self.query)
+		parser_add.add_argument(
+			'query',
+			nargs="+",
+			type=str,
+			help='JQL like "project = ACME and status = Open"')
+
+		parser_get = subparsers.add_parser('get', help="Get issue details")
+		parser_get.set_defaults(func=self.get)
+		parser_get.add_argument(
+			'key',
+			type=str,
+			help='Issue key like "ACME-123"')
+
+		parser_filter = subparsers.add_parser('filter', help="Query by named filter")
+		parser_filter.set_defaults(func=self.filter)
+		parser_filter.add_argument(
+			'name',
+			type=str,
+			help='Named query like "acme-status-open"')
+
+		parser_comment = subparsers.add_parser('comment', help="Comment on issue")
+		parser_comment.set_defaults(func=self.comment)
+		parser_comment.add_argument(
+			'key',
+			type=str,
+			help='Issue key like "ACME-123"')
+		parser_comment.add_argument(
+			'comment',
+			nargs="+",
+			type=str,
+			help='Comment text like "Deployed application to *QA*"')
+
+		parser_comments = subparsers.add_parser('comments', help="Show comments of issue")
+		parser_comments.set_defaults(func=self.comments)
+		parser_comments.add_argument(
+			'key',
+			type=str,
+			help='Issue key like "ACME-123"')
+
+		parser_assign = subparsers.add_parser('assign', help="Assign issue to someone")
+		parser_assign.set_defaults(func=self.assign)
+		parser_assign.add_argument(
+			'key',
+			type=str,
+			help='Issue key like "ACME-123"')
+		parser_assign.add_argument(
+			'name',
+			type=str,
+			help='User name or name fragment like "j.d" or "j.doe" or "John"')
+
+		parser_unassign = subparsers.add_parser('unassign', help="Unassign")
+		parser_unassign.set_defaults(func=self.unassign)
+		parser_unassign.add_argument(
+			'key',
+			type=str,
+			help='Issue key like "ACME-123"')
+
+		parser_assignees = subparsers.add_parser('assignees', help="List assignees by name fragment")
+		parser_assignees.set_defaults(func=self.assignees)
+		parser_assignees.add_argument(
+			'username_fragement',
+			type=str,
+			help='User name or name fragment like "j.d" or "j.doe" or "John"')
+
+
+		parsed = parser.parse_args(sys.argv[1:])
 
 		self._read_config()
-
 		self._init()
 
-		cmd = sys.argv[1]
-
-		if cmd == "jql":
-			self.jql(sys.argv[2])
-		elif cmd == "filter":
-			self.filter(sys.argv[2])
-		elif cmd == "get":
-			self.get(sys.argv[2])
-		elif cmd == "comments":
-			self.comments(sys.argv[2])
-		elif cmd == "comment":
-			self.comment(sys.argv[2], sys.argv[3])
-		elif cmd == "assign":
-			self.assign(sys.argv[2], sys.argv[3])
-		elif cmd == "unassign":
-			self.unassign(sys.argv[2])
-		elif cmd == "assignees":
-			self.get_assignees(sys.argv[2])
-
-
+		# run configured subcommand with parsed args
+		parsed.func(parsed)
 
 if __name__ == "__main__":
 	cli = PyJiraCli()

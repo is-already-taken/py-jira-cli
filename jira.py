@@ -78,6 +78,21 @@ class JiraRestApi(object):
 
 		return True
 
+	def myself(self):
+		if self._auth_cookies == None:
+			raise JiraAuthException("Not authenticated")
+
+		call = "/api/2/myself"
+
+		(status, res, cookies) = self.http.get(
+			self._base_url + call,
+			headers=["Content-Type: application/json"],
+			cookies=self._auth_cookies)
+
+		if status != 200:
+			raise JiraStatusException(status, call, str(res))
+
+		return json.loads(res)
 
 	def search(self, jql, max_results=10, fields=["summary", "status"]):
 		if self._auth_cookies == None:
@@ -297,7 +312,14 @@ class Comment(object):
 
 class User(object):
 	def __init__(self, raw_obj):
-		self._key = raw_obj["key"].encode("utf8")
+		if "name" in raw_obj:
+			name_ = raw_obj["name"]
+		elif "key" in raw_obj:
+			name_ = raw_obj["key"]
+		else:
+			raise Exception("Raw user object neither contains 'name' nor 'key'")
+
+		self._key = name_.encode("utf8")
 		self._display_name = raw_obj["displayName"].encode("utf8")
 		self._email = raw_obj["emailAddress"].encode("utf8")
 
@@ -325,6 +347,8 @@ class Jira(object):
 	def check_auth(self, auth_cookies):
 		return self.jira_api.check_auth(auth_cookies)
 
+	def myself(self):
+		return User(self.jira_api.myself())
 
 	# login
 	def login(self, username, password):

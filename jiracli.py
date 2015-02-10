@@ -145,7 +145,10 @@ class PyJiraCli(object):
 		(issues, remaining_results, limited_to) = self.jira.search(query)
 
 		for issue in issues:
-			print self.printer.oneline(issue)
+			if self._parsed.render_tree:
+				print self.printer.tree(issue)
+			else:
+				print self.printer.oneline(issue)
 
 		if remaining_results > 0:
 			print "%d Issues remaining (limited to %d)" % (remaining_results, limited_to)
@@ -220,8 +223,8 @@ class PyJiraCli(object):
 		print "\n".join(str(user) for user in users)
 
 	def _parse_args(self):
-		parser = argparse.ArgumentParser()
-		subparsers = parser.add_subparsers(
+		self.parser = argparse.ArgumentParser()
+		subparsers = self.parser.add_subparsers(
 			title='subcommands',
 			description='valid subcommands',
 			help='additional help')
@@ -238,6 +241,13 @@ class PyJiraCli(object):
 			'-V','--version',
 			action='version',
 			version='%(prog)s ' + VERSION)
+
+		parser.add_argument(
+			'-s', '--subtasks',
+			dest="render_tree",
+			help="When listing issues render subtasks if applicable",
+			action='store_true'
+		)
 
 
 		subparsers = parser.add_subparsers(
@@ -310,7 +320,7 @@ class PyJiraCli(object):
 			help='User name or name fragment like "j.d" or "j.doe" or "John"')
 
 
-		parsed = parser.parse_args(sys.argv[1:])
+		self._parsed = parser.parse_args(sys.argv[1:])
 
 		self._read_config()
 		self._init()
@@ -318,7 +328,7 @@ class PyJiraCli(object):
 
 		try:
 			# run configured subcommand with parsed args
-			parsed.func(parsed)
+			self._parsed.func(self._parsed)
 
 		except jira.JiraStatusException as jse:
 			messages = jse.get_messages()

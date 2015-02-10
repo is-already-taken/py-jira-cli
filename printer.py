@@ -215,7 +215,8 @@ class Printer(object):
 
 		s = self.oneline(issue, show_subtasks=False)
 
-		s += " " + self._progress(issue._subtasks) + "\n"
+		if len(issue._subtasks) > 0:
+			s += " " + self._progress(issue._subtasks) + "\n"
 
 		if len(issue._subtasks) != 0:
 			for subtask in issue._subtasks[0:-1]:
@@ -228,6 +229,7 @@ class Printer(object):
 	"""Render progressbar for subtask list's closed/resolved progress"""
 	def _progress(self, subtasks, length=10):
 		overall = len(subtasks)
+
 		resolved = len(filter(lambda issue: issue._status == "Resolved", subtasks))
 		closed = len(filter(lambda issue: issue._status == "Closed", subtasks))
 		undone = overall - resolved - closed

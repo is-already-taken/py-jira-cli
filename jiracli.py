@@ -6,7 +6,7 @@ import crypt
 import getpass
 import jira
 import datetime
-from textwrap import wrap
+from printer import Printer
 import argparse
 from release import VERSION, BINARY_NAME
 
@@ -137,15 +137,15 @@ class PyJiraCli(object):
 			else:
 				self._store_session()
 
+		self.printer = Printer(width=80)
+
 	def _query(self, query):
 		# summary, assignee, reporter, status, created, updated, description, parent, project, subtasks
 
 		(issues, remaining_results, limited_to) = self.jira.search(query)
-		# print "\n".join(str(issue) for issue in issues)
+
 		for issue in issues:
-			print issue
-			if len(issue._subtasks) > 0:
-				print "\n".join(" |- " + str(subtask) for subtask in issue._subtasks)
+			print self.printer.oneline(issue)
 
 		if remaining_results > 0:
 			print "%d Issues remaining (limited to %d)" % (remaining_results, limited_to)
@@ -166,22 +166,7 @@ class PyJiraCli(object):
 	def get(self, args):
 		issue = self.jira.get(args.key)
 
-		_formatted_date = datetime.datetime.utcfromtimestamp(issue._updated).strftime("%d.%m.%y %H:%M")
-
-		print "%s\tType: %s\tStatus: %s" % (issue._key, issue._type, issue._status)
-		print "-" * 80
-		print "Updated: %s" % (_formatted_date)
-		if issue._parent != None:
-			print "-" * 80
-			print "Parent: %s" % (str(issue._parent))
-		print "-" * 80
-		print issue._summary
-		print "=" * 80
-		print "\n".join(wrap(issue._description, width=80))
-		if len(issue._subtasks) > 0:
-			print "-" * 80
-			print "Subtasks:"
-			print "\n".join(["  - " + str(sub_task) for sub_task in issue._subtasks])
+		print self.printer.card(issue)
 
 
 	def comments(self, args):

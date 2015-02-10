@@ -230,45 +230,40 @@ class JiraAuthException(BaseException):
 
 JiraRestApi._CURL_VERBOSE = False
 
-
-class BasicIssue(object):
-
-	def __init__(self, raw_obj):
-		fields = raw_obj["fields"]
-		self._key = raw_obj["key"].encode("utf8")
-		self._summary = fields["summary"].encode("utf8")
-		self._status = fields["status"]["name"].encode("utf8")
-		self._type = fields["issuetype"]["name"].encode("utf8")
-
-	def __str__(self):
-		return  "%s [%s] %s" % (self._key, self._status, self._summary)
-
-class Issue(BasicIssue):
+class Issue(object):
 
 	def __init__(self, raw_obj):
 		fields = raw_obj["fields"]
 		self._key = raw_obj["key"].encode("utf8")
 		self._summary = fields["summary"].encode("utf8")
 		self._status = fields["status"]["name"].encode("utf8")
-		self._description = fields["description"].encode("utf8")
+
+		if "description" in fields and fields["description"] != None:
+			self._description = fields["description"].encode("utf8")
+		else:
+			self._description = None
+
 		self._type = fields["issuetype"]["name"].encode("utf8")
 
-		if fields["assignee"] != None:
+		if "assignee" in fields and fields["assignee"] != None:
 			self._assignee = fields["assignee"]["displayName"].encode("utf8")
 		else:
 			self._assignee = None
 
-		_updated = fields["updated"]
-		self._updated = time.mktime(dateutil.parser.parse(_updated).timetuple())
-
 		if "parent" in fields and fields["parent"] != None:
-			self._parent = BasicIssue(fields["parent"])
+			self._parent = Issue(fields["parent"])
 		else:
 			self._parent = None
 
+		if "updated" in fields and fields["updated"] != None:
+			_updated = fields["updated"]
+			self._updated = time.mktime(dateutil.parser.parse(_updated).timetuple())
+		else:
+			_updated = None
+
 		if "subtasks" in fields and fields["subtasks"] != None:
 			_subtasks = fields["subtasks"]
-			_subtasks = map(lambda issue: BasicIssue(issue), _subtasks)
+			_subtasks = map(lambda issue: Issue(issue), _subtasks)
 			self._subtasks = _subtasks
 		else:
 			self._subtasks = []

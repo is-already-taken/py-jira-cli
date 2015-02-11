@@ -261,7 +261,7 @@ class Issue(object):
 		self._type = fields["issuetype"]["name"].encode("utf8")
 
 		if "assignee" in fields and fields["assignee"] != None:
-			self._assignee = fields["assignee"]["displayName"].encode("utf8")
+			self._assignee = User(fields["assignee"])
 		else:
 			self._assignee = None
 
@@ -329,8 +329,11 @@ class User(object):
 			self._email = None
 
 	def __str__(self):
-		return "%s %s (%s)" % (self._key.ljust(20), self._display_name, self._email)
+		return self._display_name
 
+	"""Equal when other is User and key/name is equal"""
+	def __eq__(self, other):
+		return other != None and type(other) == User and other._key == self._key
 
 class Jira(object):
 

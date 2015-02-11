@@ -835,6 +835,7 @@ class JiraTest(unittest.TestCase):
 				"summary": "Summary",
 				"description": "Descrption",
 				"assignee": {
+					"name": "s.user",
 					"displayName": "some user"
 				},
 				"status": {
@@ -873,7 +874,8 @@ class JiraTest(unittest.TestCase):
 		assert issue._key == "KEY-12345"
 		assert issue._type == "bug"
 		assert issue._status == "open"
-		assert issue._assignee == "some user"
+		assert type(issue._assignee) == jira.User
+		assert issue._assignee._display_name == "some user"
 		assert issue._description == "Descrption"
 		assert issue._summary == "Summary"
 		assert issue._parent._key == "KEY-98765"
@@ -889,6 +891,7 @@ class JiraTest(unittest.TestCase):
 				"summary": "Summary",
 				"description": "Descrption",
 				"assignee": {
+					"name": "s.user",
 					"displayName": "some user"
 				},
 				"status": {
@@ -929,7 +932,8 @@ class JiraTest(unittest.TestCase):
 		assert issue._key == "KEY-12345"
 		assert issue._type == "bug"
 		assert issue._status == "open"
-		assert issue._assignee == "some user"
+		assert type(issue._assignee) == jira.User
+		assert issue._assignee._display_name == "some user"
 		assert issue._description == "Descrption"
 		assert issue._summary == "Summary"
 		assert int(issue._updated) == 1422036223

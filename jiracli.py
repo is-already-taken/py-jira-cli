@@ -220,7 +220,8 @@ class PyJiraCli(object):
 	def assignees(self, args):
 		users = self.jira.get_assignees(args.username_fragement)
 
-		print "\n".join(str(user) for user in users)
+		for user in users:
+			print "%s %s (%s)" % (user._key.ljust(20), user._display_name, user._email)
 
 	def _parse_args(self):
 		self.parser = argparse.ArgumentParser()

@@ -321,7 +321,12 @@ class User(object):
 
 		self._key = name_.encode("utf8")
 		self._display_name = raw_obj["displayName"].encode("utf8")
-		self._email = raw_obj["emailAddress"].encode("utf8")
+
+		# issue user object do not have this field
+		if "emailAddress" in raw_obj and raw_obj["emailAddress"] != None:
+			self._email = raw_obj["emailAddress"].encode("utf8")
+		else:
+			self._email = None
 
 	def __str__(self):
 		return "%s %s (%s)" % (self._key.ljust(20), self._display_name, self._email)

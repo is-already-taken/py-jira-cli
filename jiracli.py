@@ -137,7 +137,9 @@ class PyJiraCli(object):
 			else:
 				self._store_session()
 
-		self.printer = Printer(width=80)
+		self._me = self.jira.myself()
+
+		self.printer = Printer(me=self._me, width=80)
 
 	def _query(self, query):
 		# summary, assignee, reporter, status, created, updated, description, parent, project, subtasks

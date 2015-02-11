@@ -20,12 +20,16 @@ JIRA CLI written in Python.
 ```
 # search by JQL
 pyjiracli.py jql 'project = ACME and status = "In Progress"'
+pyjiracli.py search 'project = ACME and status = "In Progress"'
+pyjiracli.py query 'project = ACME and status = "In Progress"'
 
 # search by stored filter filter
 pyjiracli.py filter 'assigned-to-me-filter'
 
 # get issue details
 pyjiracli.py get ACME-42
+pyjiracli.py show ACME-42
+pyjiracli.py issue ACME-42
 
 # show comments
 pyjiracli.py comments ACME-42

@@ -232,6 +232,30 @@ class PyJiraCli(object):
 			description='valid subcommands',
 			help='additional help')
 
+	def _get_cmd_subparser(self, subparsers, fn, names, help, arguments):
+		subparser_no = 0
+
+		for name in names:
+			cmd_help = help
+
+			if subparser_no > 0:
+				cmd_help += " (alias for %s)" % names[0]
+
+			cmd_parser = subparsers.add_parser(name, help=cmd_help)
+			cmd_parser.set_defaults(func=fn)
+
+			# iterate over all argument config options
+			# arguments maps a named positional argument
+			# to their configs (nargs, help, etc)
+			for arg_name, config in arguments.iteritems():
+				cmd_parser.add_argument(
+					arg_name,
+					nargs=(config["nargs"] if "nargs" in config else None),
+					type=str,
+					help=config["help"])
+
+			subparser_no += 1
+
 
 	def run(self):
 		parser = argparse.ArgumentParser(
@@ -256,20 +280,26 @@ class PyJiraCli(object):
 		subparsers = parser.add_subparsers(
 			title='COMMANDS')
 
-		parser_add = subparsers.add_parser('jql', help="Query by JQL")
-		parser_add.set_defaults(func=self.query)
-		parser_add.add_argument(
-			'query',
-			nargs="+",
-			type=str,
-			help='JQL like "project = ACME and status = Open"')
+		self._get_cmd_subparser(
+			subparsers,
+			self.query,
+			["jql", "search", "query"],
+			"Query by JQL", {
+				"query": {
+					"nargs": "+",
+					"help": 'JQL like "project = ACME and status = Open"'
+				}
+			})
 
-		parser_get = subparsers.add_parser('get', help="Get issue details")
-		parser_get.set_defaults(func=self.get)
-		parser_get.add_argument(
-			'key',
-			type=str,
-			help='Issue key like "ACME-123"')
+		self._get_cmd_subparser(
+			subparsers,
+			self.get,
+			["get", "show", "issue"],
+			"Get issue details", {
+				"key": {
+					"help": 'Issue key like "ACME-123"'
+				}
+			})
 
 		parser_filter = subparsers.add_parser('filter', help="Query by named filter")
 		parser_filter.set_defaults(func=self.filter)

@@ -62,25 +62,13 @@ class CompositeStyled(object):
 """Wrap string with styles if a coloring module is available. Provides the correct length when using len(...)"""
 class Styled():
 	def __init__(self, s, fore=None, back=None):
-		try:
-			from ansi.colour import fx
-
-			# sucessfully imported
-			self._use_color = True
-		except Exception as e:
-			# unable to import
-			self._use_color = False
-
-		if fore == None:
-			self._use_color = False
-
 		self._str = s
 		self._fg = fore if fore != None else None
 		self._bg = back
 
 	"""Return styled string if coloring is available"""
 	def __str__(self):
-		if not self._use_color:
+		if not Styled.use_color or self._fg == None:
 			# directly return string
 			return str(self._str)
 
@@ -140,6 +128,9 @@ try:
 
 	from ansi.colour import fg, bg, fx
 
+	# Store flag whether to use colors or not
+	Styled.use_color = True
+
 	Styled.fg["black"] = fg.black
 	Styled.fg["red"] = fg.red
 	Styled.fg["green"] = fg.green
@@ -163,7 +154,7 @@ try:
 	Styled.reset = fx.reset
 
 except Exception as e:
-	pass
+	Styled.use_color = False
 
 
 """Standard printer that uses styling throug Styled (falls back to unstyled if not available)"""

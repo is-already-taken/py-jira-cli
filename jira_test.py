@@ -126,6 +126,79 @@ class JiraRestApiTest(unittest.TestCase):
 		# Return new cookies
 		assert api.get_auth_cookies() == ["JSESSIONID=1234", "crowd.token_key=ABCDE"]
 
+
+	@fudge.patch("http.Http")
+	def test_myself_unauthorized(self, Http_Mock):
+		(Http_Mock.expects_call()
+					.with_args(_curl_verbose=False, user_agent_prefix="PyJira", proxy=None)
+					.returns_fake()
+					.provides('get')
+						.with_args(
+							"http://host/base/api/2/myself",
+							headers=["Content-Type: application/json"],
+							cookies=["A", "B"])
+						.returns( (111, "", []) ))
+
+		api = jira.JiraRestApi("http://host/base")
+
+		self.assertRaises(jira.JiraAuthException, api.myself)
+
+
+	@fudge.patch("http.Http")
+	def test_myself_successful(self, Http_Mock):
+		response_json_str = json.dumps({
+			"response": "json",
+			"of": "myself"
+		})
+
+		(Http_Mock.expects_call()
+					.with_args(_curl_verbose=False, user_agent_prefix="PyJira", proxy=None)
+					.returns_fake()
+					.expects('get')
+						.with_args(
+							"http://host/base/api/2/myself",
+							headers=["Content-Type: application/json"],
+							cookies=["A", "B"])
+						.returns( (200, response_json_str, []) ))
+
+		api = jira.JiraRestApi("http://host/base")
+
+		# bypass authorization check
+		# TODO find a way to easily "dummy check" auth here
+		api._auth_cookies = ["A", "B"]
+
+		assert api.myself() == {
+			"response": "json",
+			"of": "myself"
+		}
+
+
+	@fudge.patch("http.Http")
+	def test_myself_unsuccessful(self, Http_Mock):
+		response_json_str = json.dumps({
+			"response": "json",
+			"of": "myself"
+		})
+
+		(Http_Mock.expects_call()
+					.with_args(_curl_verbose=False, user_agent_prefix="PyJira", proxy=None)
+					.returns_fake()
+					.expects('get')
+						.with_args(
+							"http://host/base/api/2/myself",
+							headers=["Content-Type: application/json"],
+							cookies=["A", "B"])
+						.returns( (400, response_json_str, []) ))
+
+		api = jira.JiraRestApi("http://host/base")
+
+		# bypass authorization check
+		# TODO find a way to easily "dummy check" auth here
+		api._auth_cookies = ["A", "B"]
+
+		self.assertRaises(jira.JiraStatusException, api.myself)
+
+
 	@fudge.patch("http.Http")
 	def test_login_sucessful(self, Http_Mock):
 		request_form_json = {
@@ -716,6 +789,28 @@ class JiraTest(unittest.TestCase):
 
 		assert api.login("USERNAME", "PASSWORD") == False
 
+
+	@fudge.patch("jira.JiraRestApi")
+	def test_myself(self, JiraRestApi_Mock):
+		myself_json = {
+			"key": "u.name",
+			"displayName": "User Name",
+			"emailAddress": "u.name@acme.com"
+		}
+
+		(JiraRestApi_Mock.expects_call()
+					.with_args("http://host/base", user_agent_prefix="PyJira", proxy=None)
+					.returns_fake()
+					.expects('myself')
+						.returns(myself_json))
+
+		api = jira.Jira("http://host/base")
+
+		user = api.myself()
+
+		assert user._key == "u.name"
+		assert user._display_name == "User Name"
+		assert user._email == "u.name@acme.com"
 
 	def _test_search_prepare_data(self, count, max_results, total):
 		issues = []

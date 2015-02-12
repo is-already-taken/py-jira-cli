@@ -69,6 +69,7 @@ Development of main featureset done.
 # Requirements
 
 - Python: PyCurl (tested with 7.19.0)
+- Python: ansi 0.1.x (optionally for colorized output)
 - JIRA with REST API enabled (tested with 6.x)
 - Python: fudge 1.0.x (only for unittests)
 - Python: mox 0.5.x (only for unittests)

@@ -61,6 +61,10 @@ Development of main featureset done.
 [Installation and configuration](install.md)
 
 
+# Changes
+
+[Changelog](changelog.md)
+
 
 # Requirements
 

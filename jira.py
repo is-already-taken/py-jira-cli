@@ -339,6 +339,7 @@ class Jira(object):
 
 	def __init__(self, base_url, user_agent_prefix="PyJira", proxy=None):
 		self.jira_api = JiraRestApi(base_url, user_agent_prefix=user_agent_prefix, proxy=proxy)
+		self.me = None
 
 
 	def close(self):
@@ -353,14 +354,24 @@ class Jira(object):
 	# check auth by passed session cookies and
 	# internally set the auth cookies
 	def check_auth(self, auth_cookies):
-		return self.jira_api.check_auth(auth_cookies)
+		logged_in =  self.jira_api.check_auth(auth_cookies)
+
+		if logged_in:
+			self.me = self.myself()
+
+		return logged_in
 
 	def myself(self):
 		return User(self.jira_api.myself())
 
-	# login
+	# login and get user details
 	def login(self, username, password):
-		return self.jira_api.login(username, password)
+		logged_in = self.jira_api.login(username, password)
+
+		if logged_in:
+			self.me = self.myself()
+
+		return logged_in
 
 
 	def search(self, jql, max_results=10, fields=["summary", "description", "assignee", "status", "issuetype", "updated", "parent", "subtasks"]):

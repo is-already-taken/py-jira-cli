@@ -751,45 +751,66 @@ class JiraTest(unittest.TestCase):
 
 	@fudge.patch("jira.JiraRestApi")
 	def test_check_auth_success(self, JiraRestApi_Mock):
-		(JiraRestApi_Mock.expects_call()
-			.with_args("http://host/base", user_agent_prefix="PyJira", proxy=None)
-			.returns_fake()
-				.expects('check_auth')
-					.with_args( ["a", "b"] )
-					.returns(True))
+		jira_rest_mock = (JiraRestApi_Mock.expects_call()
+					.with_args("http://host/base", user_agent_prefix="PyJira", proxy=None)
+					.returns_fake())
+
+		(jira_rest_mock.expects('check_auth')
+			.with_args( ["a", "b"] )
+			.returns(True))
+
+
+		(jira_rest_mock.expects('myself')
+			.returns({
+				"name": "s.user",
+				"displayName": "Some User",
+				"emailAddress": "s.user@acme.com"
+		}))
 
 		api = jira.Jira("http://host/base")
 
 		assert api.check_auth(["a", "b"]) == True
+		assert api.me != None
 
 	@fudge.patch("jira.JiraRestApi")
 	def test_check_auth_fail(self, JiraRestApi_Mock):
-		(JiraRestApi_Mock.expects_call()
-			.with_args("http://host/base", user_agent_prefix="PyJira", proxy=None)
-			.returns_fake()
-				.expects('check_auth')
-					.with_args( ["a", "b"] )
-					.returns(False))
+		jira_rest_mock = (JiraRestApi_Mock.expects_call()
+					.with_args("http://host/base", user_agent_prefix="PyJira", proxy=None)
+					.returns_fake())
+
+		(jira_rest_mock.expects('check_auth')
+			.with_args( ["a", "b"] )
+			.returns(False))
 
 
 		api = jira.Jira("http://host/base")
 
 		assert api.check_auth(["a", "b"]) == False
-
+		assert api.me == None
 
 
 	@fudge.patch("jira.JiraRestApi")
 	def test_login_success(self, JiraRestApi_Mock):
-		(JiraRestApi_Mock.expects_call()
+		jira_rest_mock = (JiraRestApi_Mock.expects_call()
 					.with_args("http://host/base", user_agent_prefix="PyJira", proxy=None)
-					.returns_fake()
-					.expects('login')
-						.with_args("USERNAME", "PASSWORD")
-						.returns(True))
+					.returns_fake())
+
+		(jira_rest_mock.expects('login')
+			.with_args("USERNAME", "PASSWORD")
+			.returns(True))
+
+
+		(jira_rest_mock.expects('myself')
+			.returns({
+				"name": "s.user",
+				"displayName": "Some User",
+				"emailAddress": "s.user@acme.com"
+		}))
 
 		api = jira.Jira("http://host/base")
 
 		assert api.login("USERNAME", "PASSWORD") == True
+		assert api.me != None
 
 
 	@fudge.patch("jira.JiraRestApi")
@@ -804,6 +825,7 @@ class JiraTest(unittest.TestCase):
 		api = jira.Jira("http://host/base")
 
 		assert api.login("USERNAME", "PASSWORD") == False
+		assert api.me == None
 
 
 	@fudge.patch("jira.JiraRestApi")

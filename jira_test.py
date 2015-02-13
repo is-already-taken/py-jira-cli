@@ -748,18 +748,34 @@ class JiraTest(unittest.TestCase):
 		assert api.get_auth_cookies() == ["A", "B"]
 
 
+
 	@fudge.patch("jira.JiraRestApi")
-	def test_check_auth(self, JiraRestApi_Mock):
+	def test_check_auth_success(self, JiraRestApi_Mock):
 		(JiraRestApi_Mock.expects_call()
-					.with_args("http://host/base", user_agent_prefix="PyJira", proxy=None)
-					.returns_fake()
-					.expects('check_auth')
-						.with_args( ["a", "b"] )
-						.returns( ["A", "B"] ))
+			.with_args("http://host/base", user_agent_prefix="PyJira", proxy=None)
+			.returns_fake()
+				.expects('check_auth')
+					.with_args( ["a", "b"] )
+					.returns(True))
 
 		api = jira.Jira("http://host/base")
 
-		assert api.check_auth(["a", "b"]) == ["A", "B"]
+		assert api.check_auth(["a", "b"]) == True
+
+	@fudge.patch("jira.JiraRestApi")
+	def test_check_auth_fail(self, JiraRestApi_Mock):
+		(JiraRestApi_Mock.expects_call()
+			.with_args("http://host/base", user_agent_prefix="PyJira", proxy=None)
+			.returns_fake()
+				.expects('check_auth')
+					.with_args( ["a", "b"] )
+					.returns(False))
+
+
+		api = jira.Jira("http://host/base")
+
+		assert api.check_auth(["a", "b"]) == False
+
 
 
 	@fudge.patch("jira.JiraRestApi")

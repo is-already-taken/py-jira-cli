@@ -409,6 +409,9 @@ class Jira(object):
 	def unassign(self, key):
 		self.jira_api.assign(key, None)
 
+	def assign_to_me(self, key):
+		self.jira_api.assign(key, self.me._key)
+
 	def get_assignees(self, username_fragment):
 		users = self.jira_api.get_assignees(username_fragment)
 

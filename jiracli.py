@@ -219,6 +219,9 @@ class PyJiraCli(object):
 	def unassign(self, args):
 		self.jira.unassign(args.key)
 
+	def assign_to_me(self, args):
+		self.jira.assign_to_me(args.key)
+
 	def assignees(self, args):
 		users = self.jira.get_assignees(args.username_fragement)
 
@@ -344,6 +347,16 @@ class PyJiraCli(object):
 			'key',
 			type=str,
 			help='Issue key like "ACME-123"')
+
+		self._get_cmd_subparser(
+			subparsers,
+			self.assign_to_me,
+			["assignme", "tome"],
+			"Assign issue to me", {
+				"key": {
+					"help": 'Issue key like "ACME-123"'
+				}
+			})
 
 		parser_assignees = subparsers.add_parser('assignees', help="List assignees by name fragment")
 		parser_assignees.set_defaults(func=self.assignees)

@@ -301,7 +301,7 @@ class Issue(object):
 
 class Comment(object):
 	def __init__(self, raw_obj):
-		self._body = raw_obj["body"]
+		self._body = raw_obj["body"].encode("utf8")
 
 		_created = raw_obj["created"]
 

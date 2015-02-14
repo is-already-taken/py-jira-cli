@@ -240,10 +240,10 @@ class Printer(object):
 	def _ruler(self):
 		return str(self._headline("-" * self._width))
 
+	def _format_date(self, timestamp):
+		return datetime.datetime.utcfromtimestamp(timestamp).strftime("%d.%m.%y %H:%M")
 
 	def card(self, issue):
-		_formatted_date = datetime.datetime.utcfromtimestamp(issue._updated).strftime("%d.%m.%y %H:%M")
-
 		status = issue._status
 
 		# get color for status
@@ -259,7 +259,7 @@ class Printer(object):
 		s += self._ruler() + "\n"
 
 		# UPDATED
-		s += str(self._headline("Updated: ") + _formatted_date) + "\n"
+		s += str(self._headline("Updated: ") + self._format_date(issue._updated)) + "\n"
 
 		# RULER, PARET ISSUE
 		if issue._parent != None:

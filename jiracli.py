@@ -15,6 +15,9 @@ CONFIG_FILE=".pyjirarc"
 
 DEFAULT_STORE_PATH = ".pyjirastore"
 
+# default limit for issues returned from a query
+MAX_ISSUES_LIMIT = 50
+
 class PyJiraCli(object):
 
 	def _fail(self, message):
@@ -139,10 +142,10 @@ class PyJiraCli(object):
 
 		self.printer = Printer(me=self.jira.me, width=80)
 
-	def _query(self, query):
+	def _query(self, query, limit):
 		# summary, assignee, reporter, status, created, updated, description, parent, project, subtasks
 
-		(issues, remaining_results, limited_to) = self.jira.search(query)
+		(issues, remaining_results, limited_to) = self.jira.search(query, max_results=limit)
 
 		for issue in issues:
 			if self._parsed.render_tree:
@@ -156,7 +159,7 @@ class PyJiraCli(object):
 	def query(self, args):
 		query = " ".join(args.query)
 
-		self._query(query)
+		self._query(query, args.query_limit)
 
 	def filter(self, args):
 		jql = self._get_option(self.config, "filters", args.name, None)
@@ -164,7 +167,7 @@ class PyJiraCli(object):
 		if jql == None:
 			self._fail("Filter \"%s\" not found" % args.name)
 
-		self._query(jql)
+		self._query(jql, args.query_limit)
 
 	def get(self, args):
 		issue = self.jira.get(args.key)
@@ -277,6 +280,22 @@ class PyJiraCli(object):
 			action='store_true'
 		)
 
+		class LimitSwitchAction(argparse.Action):
+			def __call__(self, parser, namespace, values, option_string=None):
+				if values > 10000 or values <= 0:
+					raise Exception("Limit %d exceeds range 1 - 10000" % values)
+
+				setattr(namespace, self.dest, values)
+
+		parser.add_argument(
+			'-l', '--limit',
+			dest="query_limit",
+			type=int,
+			default=MAX_ISSUES_LIMIT,
+			metavar='N',
+			help="When searching/filtering limit issues to N (defaults to %d)" % (MAX_ISSUES_LIMIT),
+			action=LimitSwitchAction
+		)
 
 		subparsers = parser.add_subparsers(
 			title='COMMANDS')
@@ -364,7 +383,10 @@ class PyJiraCli(object):
 			help='User name or name fragment like "j.d" or "j.doe" or "John"')
 
 
-		self._parsed = parser.parse_args(sys.argv[1:])
+		try:
+			self._parsed = parser.parse_args(sys.argv[1:])
+		except Exception as e:
+			self._fail(e)
 
 		self._read_config()
 		self._init()

@@ -284,3 +284,15 @@ class Printer(object):
 			s +=  "\n".join(["  - " + self.oneline(sub_task) for sub_task in issue._subtasks]) + "\n"
 
 		return s
+
+
+	def comments(self, comments):
+		s = ""
+
+		for comment in comments:
+			date = self._format_date(comment._created)
+			s += "--- %s %s" % (date, "-" * (self._width - len(date))) + "\n"
+			s += comment._body + "\n"
+			s += "\n"
+
+		return s

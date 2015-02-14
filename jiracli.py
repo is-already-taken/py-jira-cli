@@ -174,7 +174,7 @@ class PyJiraCli(object):
 
 	def comments(self, args):
 		comments = self.jira.get_comments(args.key)
-		print "\n\n".join([str(comment) for comment in comments])
+		print self.printer.comments(comments)
 
 	def comment(self, args):
 		self.jira.add_comment(args.key, " ".join(args.comment))

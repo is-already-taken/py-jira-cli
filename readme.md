@@ -44,6 +44,10 @@ pyjiracli.py assign ACME-42 "j.doe"
 # unassign issue
 pyjiracli.py unassign ACME-42
 
+# assign to me
+pyjiracli.py assignme ACME-42
+pyjiracli.py tome ACME-42
+
 # get list of assignees applicable to username (fragment)
 pyjiracli.py assignees "j.d"
 pyjiracli.py assignees "j.doe"

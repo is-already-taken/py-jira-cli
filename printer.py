@@ -256,6 +256,16 @@ class Printer(object):
 	def _format_date(self, timestamp):
 		return datetime.datetime.utcfromtimestamp(timestamp).strftime("%d.%m.%y %H:%M")
 
+	"""Format text respecting new lines thart are already present"""
+	def _wrap_text(self, text):
+		text = text.replace("\r", "")
+
+		lines = text.split("\n")
+
+		lines = map(lambda line: "\n".join(wrap(line, width=self._width)), lines)
+
+		return "\n".join(lines)
+
 	def card(self, issue):
 		status = issue._status
 
@@ -287,7 +297,7 @@ class Printer(object):
 		s +=  self._ruler() + "\n"
 
 		# DESCCRIPTION
-		s +=  "\n".join(wrap(issue._description, width=self._width)) + "\n"
+		s +=  self._wrap_text(issue._description) + "\n"
 
 		# RULER, SUBTASK LIST
 		if len(issue._subtasks) > 0:
@@ -305,7 +315,7 @@ class Printer(object):
 		for comment in comments:
 			date = self._format_date(comment._created)
 			s += "--- %s %s" % (date, "-" * (self._width - len(date))) + "\n"
-			s += comment._body + "\n"
+			s += self._wrap_text(comment._body) + "\n"
 			s += "\n"
 
 		return s

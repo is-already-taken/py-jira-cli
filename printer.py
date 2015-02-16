@@ -222,15 +222,27 @@ class Printer(object):
 	def _progress(self, subtasks, length=10):
 		overall = len(subtasks)
 
-		resolved = len(filter(lambda issue: issue._status == "Resolved", subtasks))
-		closed = len(filter(lambda issue: issue._status == "Closed", subtasks))
-		undone = overall - resolved - closed
+		done = len(filter(lambda issue: issue._status == "Resolved" or issue._status == "Closed", subtasks))
+		undone = overall - done
 
-		return ("["
-			+ str(Styled("=" * int(math.floor(closed) / overall * length), Styled.fg["green"]))
-			+ str(Styled("=" * int(math.floor(resolved) / overall * length), Styled.fg["brightgreen"]))
-			+ (" " * int(math.floor(undone) / overall * length))
-			+ "]")
+		pct_done = int(math.floor((float(done) / overall) * length))
+		pct_undone = int(math.floor((float(undone) / overall) * length))
+
+		# array that composes the parts of the progress bar
+		pct_parts = [pct_done, 1 if undone != pct_undone else 0, pct_undone]
+
+		# zip part count and symbol together
+		parts = zip(pct_parts, ["=", "~", " "])
+
+		# map that tupel by multipying the symbol (1) with the count (0)
+		parts = map(lambda x: x[1] * x[0], parts)
+
+		# 1. zip segments and colors together
+		# 2. wrap with Styled()
+		parts = map(lambda x: str(Styled(x[0], x[1])), zip(parts, [Styled.fg["brightgreen"], Styled.fg["green"], None]))
+
+		return "["+ "".join(parts) +"]"
+
 
 	"""Print text formated as headline"""
 	def _headline(self, text):

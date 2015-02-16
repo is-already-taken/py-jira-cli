@@ -140,6 +140,7 @@ try:
 	Styled.fg["grey"] = fg.grey
 	Styled.fg["darkgrey"] = fg.darkgrey
 	Styled.fg["white"] = fg.white
+	Styled.fg["brown"] = fg.brown
 
 	Styled.bg["black"] = bg.black
 	Styled.bg["red"] = bg.red
@@ -190,10 +191,10 @@ class Printer(object):
 		)
 
 		if issue._parent != None:
-			s += " ^" + issue._parent._key
+			s += str(Styled(" ^", Styled.fg["brown"]) + Styled(issue._parent._key, Styled.fg["darkgrey"]))
 
 		if issue._assignee != None:
-			s += " @" + str(issue._assignee)
+			s += str(Styled(" @", Styled.fg["brown"]) + Styled(issue._assignee, Styled.fg["darkgrey"]))
 
 		if len(issue._subtasks) != 0 and show_subtasks:
 				s += str(Styled(" [%d Subtasks]" % (len(issue._subtasks)), Styled.fg["grey"]))

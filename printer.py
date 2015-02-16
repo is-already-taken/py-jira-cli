@@ -279,7 +279,7 @@ class Printer(object):
 		# RULER, SUBTASK LIST
 		if len(issue._subtasks) > 0:
 			s +=  self._ruler() + "\n"
-			s +=  self._headline("Subtasks") + "\n"
+			s +=  str(self._headline("Subtasks")) + "\n"
 			s +=  "\n"
 			s +=  "\n".join(["  - " + self.oneline(sub_task) for sub_task in issue._subtasks]) + "\n"
 

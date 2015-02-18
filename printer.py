@@ -279,6 +279,12 @@ class Printer(object):
 			(self._headline("Status: ") + Styled(status, status_colors[0], status_colors[1]), 20)
 		], width=self._width) + "\n"
 
+		if issue._assignee != None:
+			# Print assignee right aligned
+			s += str(self._headline("Assignee: ") + issue._assignee._display_name) + "\n"
+		else:
+			s += str(self._headline("Assignee: ") + "unassigned") + "\n"
+
 		s += self._ruler() + "\n"
 
 		# UPDATED
@@ -313,8 +319,16 @@ class Printer(object):
 		s = ""
 
 		for comment in comments:
-			date = self._format_date(comment._created)
-			s += "--- %s %s" % (date, "-" * (self._width - len(date))) + "\n"
+			date = self._format_date(comment._created if comment._updated == None else comment._updated)
+
+			if comment._updated != None:
+				date += "*"
+
+			header = "--- %s by %s " % (date, comment._author)
+
+			# fill header with dashes
+			s += header + ("-" * max(0, (self._width - len(header)))) + "\n"
+
 			s += self._wrap_text(comment._body) + "\n"
 			s += "\n"
 

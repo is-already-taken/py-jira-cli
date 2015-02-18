@@ -302,13 +302,26 @@ class Issue(object):
 class Comment(object):
 	def __init__(self, raw_obj):
 		self._body = raw_obj["body"].encode("utf8")
+		self._author = raw_obj["author"]["displayName"].encode("utf8")
 
 		_created = raw_obj["created"]
 
+		# both fields are always defined
+		_updated = raw_obj["updated"]
+		_update_author = raw_obj["updateAuthor"]["displayName"].encode("utf8")
+
 		self._created = time.mktime(dateutil.parser.parse(_created).timetuple())
 
+		# if edited, the created and updated time differ
+		if _created != _updated:
+			self._updated = time.mktime(dateutil.parser.parse(_updated).timetuple())
+			self._update_author = _update_author
+		else:
+			self._updated = None
+			self._update_author = None
+
 	def __str__(self):
-		return "--- %d -------------------\n%s" % (self._created, self._body)
+		return "--- %d by %s ------------\n%s" % (self._created, self._author, self._body)
 
 class User(object):
 	def __init__(self, raw_obj):

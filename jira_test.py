@@ -1077,11 +1077,31 @@ class JiraTest(unittest.TestCase):
 
 
 	@fudge.patch("jira.JiraRestApi")
-	def test_get_comments(self, JiraRestApi_Mock):
+	def test_get_comments_not_edited(self, JiraRestApi_Mock):
 		comments_json = {
 			"comments": [
-				{"body": "Comment 1", "created": "2015-01-23T17:42:05.000+0100"},
-				{"body": "Comment 2", "created": "2015-01-23T19:03:43.000+0100"}
+				{
+					"body": "Comment 1",
+					"created": "2015-01-23T17:42:05.000+0100",
+					"updated": "2015-01-23T17:42:05.000+0100",
+					"author": {
+						"displayName": "John Doe"
+					},
+					"updateAuthor": {
+						"displayName": "John Doe"
+					}
+				},
+				{
+					"body": "Comment 2",
+					"created": "2015-01-23T19:03:43.000+0100",
+					"updated": "2015-01-23T19:03:43.000+0100",
+					"author": {
+						"displayName": "John Doe"
+					},
+					"updateAuthor": {
+						"displayName": "John Doe"
+					}
+				}
 			]
 		}
 
@@ -1099,8 +1119,69 @@ class JiraTest(unittest.TestCase):
 		assert len(comments) == 2
 		assert comments[0]._body == "Comment 1"
 		assert int(comments[0]._created) == 1422031325
+		assert comments[0]._author == "John Doe"
+		assert comments[0]._updated == None
+		assert comments[0]._update_author == None
+
 		assert comments[1]._body == "Comment 2"
 		assert int(comments[1]._created) == 1422036223
+		assert comments[1]._author == "John Doe"
+		assert comments[1]._updated == None
+		assert comments[1]._update_author == None
+
+	@fudge.patch("jira.JiraRestApi")
+	def test_get_comments_edited(self, JiraRestApi_Mock):
+		comments_json = {
+			"comments": [
+				{
+					"body": "Comment 1",
+					"created": "2015-01-23T17:42:05.000+0100",
+					"updated": "2015-01-23T17:42:06.000+0100",
+					"author": {
+						"displayName": "John Doe"
+					},
+					"updateAuthor": {
+						"displayName": "John Doe"
+					}
+				},
+				{
+					"body": "Comment 2",
+					"created": "2015-01-23T19:03:43.000+0100",
+					"updated": "2015-01-23T19:03:44.000+0100",
+					"author": {
+						"displayName": "John Doe"
+					},
+					"updateAuthor": {
+						"displayName": "John Doe"
+					}
+				}
+			]
+		}
+
+		(JiraRestApi_Mock.expects_call()
+					.with_args("http://host/base", user_agent_prefix="PyJira", proxy=None)
+					.returns_fake()
+					.expects('get_comments')
+						.with_args("KEY-12345")
+						.returns(comments_json))
+
+		api = jira.Jira("http://host/base")
+
+		comments = api.get_comments("KEY-12345")
+
+		assert len(comments) == 2
+		assert comments[0]._body == "Comment 1"
+		assert int(comments[0]._created) == 1422031325
+		assert comments[0]._author == "John Doe"
+		assert int(comments[0]._updated) == 1422031326
+		assert comments[0]._update_author == "John Doe"
+
+		assert comments[1]._body == "Comment 2"
+		assert int(comments[1]._created) == 1422036223
+		assert comments[1]._author == "John Doe"
+		assert int(comments[1]._updated) == 1422036224
+		assert comments[1]._update_author == "John Doe"
+
 
 
 	@fudge.patch("jira.JiraRestApi")

@@ -17,3 +17,14 @@
 - Raised the default for that limit from 10 to 50
 - Fixed encoding bug in comment listing
 - Fixed date rendering in comment listing
+
+## 2015-02-21 - v0.4
+
+- Highlight username and parent issue in query result list
+- Show author in comment listing
+- Mark edited comments with "*"
+- Improved progressbar rendering in issue result list
+	- Do not distinguish between resolved and closed
+	- Render last done segment with "~" if the undone issues can't be rendered to a char
+- Fixed error when showing subtasks in card
+- Fixed multiline text rendering for description and comment: respect newlines when wrapping text
